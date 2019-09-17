@@ -28,3 +28,10 @@ Anche su dati distribuiti in molti nodi.
 - printing: collect può fare 'out of memory', concetti simili agli stream (take(n)).
 - shuffle nei nodi
 - caching oltre persistent ci sono anche modalità per specificare a quale memoria attaccarsi.
+
+## Spark SQL
+Dati strutturati, maggiori ottimizzazioni rispetto a RDD. Interagisco in vari modi, tra cui SQL e Dataset API.
+Nella computazione viene usato un unico engine di esecuzione, il programmatore può esprire le cose nel modo che ritiene più naturale. Uso di Hive, JDBC, etc. 
+Non credo questo sia interessante sul lato PPS.
+
+## 
