@@ -15,7 +15,7 @@ Nelle interrogazioni che lo richiedono vengono passate funzioni, per cui possono
 Anche su dati distribuiti in molti nodi.
 
 # Moduli
-## RDDs (Resilient Distributed Datasets)
+## [RDDs (Resilient Distributed Datasets)](https://spark.apache.org/docs/latest/rdd-programming-guide.html)
 - Concetto di `SparkContext`, una per JVM.
 - Modalità di lancio in locale (es. local[4], su 4 core) o su cluster 
 - Concetti principali:
@@ -29,10 +29,10 @@ Anche su dati distribuiti in molti nodi.
 - shuffle nei nodi
 - caching oltre persistent ci sono anche modalità per specificare a quale memoria attaccarsi.
 
-## Spark SQL
+## [Spark SQL](https://spark.apache.org/docs/latest/sql-programming-guide.html)
 Dati strutturati, maggiori ottimizzazioni rispetto a RDD. Interagisco in vari modi, tra cui SQL e Dataset API.
 Nella computazione viene usato un unico engine di esecuzione, il programmatore può esprire le cose nel modo che ritiene più naturale. Uso di Hive, JDBC, etc. 
 Non credo questo sia interessante sul lato PPS.
 
-## Structured Streaming over Spark SQL
-## Spark Streaming
+## [Structured Streaming over Spark SQL](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html)
+## [Spark Streaming](https://spark.apache.org/docs/latest/streaming-programming-guide.html)
