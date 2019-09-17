@@ -11,7 +11,20 @@ Un Dataset si può creare anche "on the fly" da un file di testo o appartenere a
 
 Nelle interrogazioni che lo richiedono vengono passate funzioni, per cui possono entrare in gioco aspetti di PPS.
 
-## [Caching]
+## Caching
 Anche su dati distribuiti in molti nodi.
 
-
+# Moduli
+## RDDs (Resilient Distributed Datasets)
+- Concetto di `SparkContext`, una per JVM.
+- Modalità di lancio in locale (es. local[4], su 4 core) o su cluster 
+- Concetti principali:
+  - `transformation`: map, sono lazy l'eventuale azione su di essa applicherà la trasformazione. Eventualmente è possibile rendere questi cambiamenti persistenti, altrimenti non lo sono.
+  - `actions`: reduce
+- Passare funzioni a Spark
+- Problema closure (PCD), soluzioni:
+  - `broadcasts`
+  - `accumulators` -> vale sempre il concetto lazy (vedi trasformazioni)
+- printing: collect può fare 'out of memory', concetti simili agli stream (take(n)).
+- shuffle nei nodi
+- caching oltre persistent ci sono anche modalità per specificare a quale memoria attaccarsi.
