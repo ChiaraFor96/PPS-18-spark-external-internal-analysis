@@ -34,4 +34,5 @@ Dati strutturati, maggiori ottimizzazioni rispetto a RDD. Interagisco in vari mo
 Nella computazione viene usato un unico engine di esecuzione, il programmatore può esprire le cose nel modo che ritiene più naturale. Uso di Hive, JDBC, etc. 
 Non credo questo sia interessante sul lato PPS.
 
-## 
+## Structured Streaming over Spark SQL
+## Spark Streaming
