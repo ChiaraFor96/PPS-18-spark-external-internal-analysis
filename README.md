@@ -36,3 +36,12 @@ Non credo questo sia interessante sul lato PPS.
 
 ## [Structured Streaming over Spark SQL](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html)
 ## [Spark Streaming](https://spark.apache.org/docs/latest/streaming-programming-guide.html)
+Dati che provengono da varie fonti (es. Kafka, Flume, Kinesis o TCP sockets) attravestro questo modulo possono essere processati usando algoritmi complessi espressi attravervo funzioni high-level come `map`, `reduce`, `join` and `window`.
+In uscita si avranno File Systems (HDFS), Databases o Dashboard da eventualemente elaborare con le funzioni di spark ML e Graph.
+
+Internamente Spark Streaming diviede lo stream in batch di dati che vengono processati dalla Spark Engine.
+
+Esiste un'astrazione di Spark che si chiama `DStream`, si tratta di dati che provengono da varie fonti (es. Kafka, Flume, and Kinesis) o da operazione ad alto livello su altri DStream.
+Un DStream può essere considerato come una sequenza di RDDs.
+
+
