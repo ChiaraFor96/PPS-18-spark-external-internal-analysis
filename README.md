@@ -51,5 +51,5 @@ Un DStream può essere considerato come una sequenza di RDDs.
 
 ## [SparkR (R on Spark)](https://spark.apache.org/docs/latest/sparkr.html)
 
-# [Internals] (https://jaceklaskowski.gitbooks.io/mastering-apache-spark/spark-overview.html)
+# [Internals](https://jaceklaskowski.gitbooks.io/mastering-apache-spark/spark-overview.html)
 #
