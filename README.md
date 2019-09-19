@@ -2,6 +2,7 @@
 Spark è un famoso framework Scala per big-data e cluster computing. In questo progetto si studieranno aspetti linguistici di questo framework, e la sua organizzazione interna -- l'obiettivo è porre le basi per futuri framework per computazione distribuita che si ispirino a Spark.
 
 # [Spark](https://spark.apache.org/docs/latest/quick-start.html)
+[Intro](https://towardsdatascience.com/introduction-to-apache-spark-with-scala-ed31d8300fe4)
 ## Spark shell
 Un [primo approccio](https://bigdata-madesimple.com/learning-scala-spark-basics-using-spark-shell-in-local/) a Spark.
 ## [Dataset API](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.Dataset)
