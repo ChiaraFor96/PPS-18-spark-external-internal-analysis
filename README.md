@@ -44,4 +44,9 @@ Internamente Spark Streaming diviede lo stream in batch di dati che vengono proc
 Esiste un'astrazione di Spark che si chiama `DStream`, si tratta di dati che provengono da varie fonti (es. Kafka, Flume, and Kinesis) o da operazione ad alto livello su altri DStream.
 Un DStream può essere considerato come una sequenza di RDDs.
 
+# [Machine Learning Library (MLlib)](https://spark.apache.org/docs/latest/ml-guide.html)
+
+# [GraphX Programming](https://spark.apache.org/docs/latest/graphx-programming-guide.html#graphx-programming-guide)
+
+# [SparkR (R on Spark)](https://spark.apache.org/docs/latest/sparkr.html)
 
