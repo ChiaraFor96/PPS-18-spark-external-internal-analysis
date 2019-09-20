@@ -46,10 +46,14 @@ Esiste un'astrazione di Spark che si chiama `DStream`, si tratta di dati che pro
 Un DStream può essere considerato come una sequenza di RDDs.
 
 ## [Machine Learning Library (MLlib)](https://spark.apache.org/docs/latest/ml-guide.html)
-
+- Algoritmi di Machine Learning: come classificazione, regressione, clustering e collaborative filtering.
+- Featurization: feature extraction, transformation, dimensionality reduction, and selection
+- Pipelines: tools for constructing, evaluating, and tuning ML Pipelines
+- Persistenza: saving and load algorithms, models, and Pipelines
+- Utility: linear algebra, statistics, data handling, etc.
 ## [GraphX Programming](https://spark.apache.org/docs/latest/graphx-programming-guide.html#graphx-programming-guide)
+Componente Spark per Grafi e calcolo graph-parallel.
 
 ## [SparkR (R on Spark)](https://spark.apache.org/docs/latest/sparkr.html)
 
 # [Internals](https://jaceklaskowski.gitbooks.io/mastering-apache-spark/spark-overview.html)
-#
