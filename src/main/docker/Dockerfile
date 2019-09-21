@@ -1,11 +1,7 @@
 FROM ubuntu
 
-MAINTAINER chiarafor
-
 ENV HADOOP_HOME /opt/hadoop
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
-
-# TODO ADD ml-latest-small /ml-latest-small
 
 RUN \
   apt-get update && apt-get install -y \
@@ -26,11 +22,15 @@ RUN \
   cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
   chmod 0600 ~/.ssh/authorized_keys
 
-ADD configs $HADOOP_HOME/etc/hadoop/
+ADD configs/*xml $HADOOP_HOME/etc/hadoop/
 
-ADD configs /root/.ssh/config
+ADD configs/ssh_config /root/.ssh/config
 
 ADD start-hadoop.sh start-hadoop.sh
+
+RUN mkdir ml-latest-small
+ADD /ml-latest-small/* ml-latest-small/
+RUN ls -la ml-latest-small/
 
 RUN mkdir $HADOOP_HOME/tmp
 
