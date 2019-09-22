@@ -5,8 +5,8 @@ launch notes:
 - docker run -ti --hostname hadoop -p 50070:50070 -p 9000:9000 -p 50075:50075 -p 50010:50010 container-name
 */
 object QuickStartTest {
-  case class Movie(movieId : Int ,title : String ,genres : Set[String])
-  import org.apache.spark.sql.{DataFrame, SQLContext, SparkSession}
+  import org.apache.spark.sql.{DataFrame, SQLContext, SparkSession, Column}
+  import org.apache.spark.sql.functions._
 
   def main ( args: Array[String] ): Unit = {
     import org.apache.log4j.Logger
@@ -18,6 +18,21 @@ object QuickStartTest {
 
     val movies = loadDF(sc, "hdfs://hadoop:9000/ml-latest-small/movies.csv")
     log.info(s"There are: ${movies.count()} movies")
+    movies.printSchema
+    movies.show(5)
+    log.info(s"Movie with longer title ${
+      movies.select(movies.col("title"), length(movies.col("title")).as("length"))
+        .sort(desc("length")).head}")
+    log.info(s"#Movies with year: ${movies.select(movies.col("title").rlike("[0-9]{4}")).count}")
+
+    movies.select(split(movies.col("genres"), "\\|").as("genres"))
+        .select(explode(new Column("genres")).as("genre")).groupBy("genre")
+        .count.show(3)
+
+    //load tags
+    loadDF(sc, "hdfs://hadoop:9000/ml-latest-small/tags.csv")
+      .groupBy("movieId").count.sort(desc("count")).limit(3)
+      .join(movies, "movieId").select("title", "count").show()
 
     sc.sparkSession.close()
   }
