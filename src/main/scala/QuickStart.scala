@@ -39,5 +39,5 @@ object QuickStart {
   }
   def loadDF(sqlContext: SQLContext, filePath: String): DataFrame = sqlContext.read
     .options(Map("header" -> "true", "inferSchema" -> "true")) //other options like: mode, timeStampFormat, nullValue
-    .csv(filePath)
+    .csv(filePath) //or more generally use .format("csv").load(filePath)
 }
