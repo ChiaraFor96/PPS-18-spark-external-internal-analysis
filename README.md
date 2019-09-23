@@ -17,7 +17,7 @@ Anche su dati distribuiti in molti nodi.
 
 # Moduli
 ## [RDDs (Resilient Distributed Datasets)](https://spark.apache.org/docs/latest/rdd-programming-guide.html)
-- Concetto di `SparkContext`, una per JVM.
+- Concetto di `SparkContext`, uno per JVM.
 - Modalità di lancio in locale (es. local[4], su 4 core) o su cluster 
 - Concetti principali:
   - `transformation`: map, sono lazy l'eventuale azione su di essa applicherà la trasformazione. Eventualmente è possibile rendere questi cambiamenti persistenti, altrimenti non lo sono.
@@ -57,3 +57,34 @@ Componente Spark per Grafi e calcolo graph-parallel.
 ## [SparkR (R on Spark)](https://spark.apache.org/docs/latest/sparkr.html)
 
 # [Internals](https://jaceklaskowski.gitbooks.io/mastering-apache-spark/spark-overview.html)
+
+## Architettura
+Posso lanciare Spark in essenzialmente due __modalità__:
+- interattiva
+- submit di un job (in caso di produzione). 
+
+Queste modalità ci aprono al concetto di `master-worker` (PCD) che nel "dialetto di Spark" è noto come `driver-executor`.
+Essenzialmente posso usare Spark con o senza un vero cluster:
+- __local mode__: uso in fase esplorativa per iniziare ad usare spark senza un effettivo cluster
+- con cluster :
+    - __client mode__: il driver è nel client, per cui è preferibile usarla in fase di debug
+    - __cluster mode__: il driver è nel cluster, la uso in produzione
+
+Quando eseguo Spark lo stato dei processi è visibile in una pagina web (Spark UI).
+
+__Chi controlla il cluster? Come Spark ottiene le risorse per driver e executor?__
+Il `cluster manager`.
+- __Apache YARN__ per Hadoop
+- __Apache Mesos__ (general purpose)
+- Kubernetes: Google, non per fasi di produzione
+- StandAlone: facile e veloce, non per produzione
+
+`Spark session`
+
+### RDDs  e tasks
+Poichè DataSet e DataFrame ereditano da RDDs, capendo questi ultimi possiamo capire come effettivamente viene distribuito il lavoro tra gli executors.
+Quando viene letto un file è possibile specificare il numero di __partizioni di un RDD__ che (guarda caso) coincide con il corrispondente __numero di task__.
+Ovviamente, numero executors e di task sono effettivamente correlati.
+
+Si lavora in __stage__, uno stage rappresenta un periodo (una o più funzione chiamata sui dati) in cui non è necessario uno shuffle, ovvero non è necessario spostare i dati tra le partizioni. Se i dati devono muoversi (es. reduceByKey) bisogna ripartizionare i dati (_shuffle & sort_).
+Con `collect` si ritorna dagli executor al driver.
