@@ -3,6 +3,15 @@ Spark è un famoso framework Scala per big-data e cluster computing. In questo p
 
 # [Spark](https://spark.apache.org/docs/latest/quick-start.html)
 [Intro](https://towardsdatascience.com/introduction-to-apache-spark-with-scala-ed31d8300fe4)
+
+Perchè è così importante?
+- Astrae la programmazione parallela, non sembra di lavorare su un cluster di computer.
+Nello scenario migliore sembrerà di lavorare con un database (SQL), nel peggiore di lavorare su collections.
+
+- Piattaforma unificata, tutto in un singolo framework
+
+- Facile da usare, leggere e capire
+
 ## Spark shell
 Un [primo approccio](https://bigdata-madesimple.com/learning-scala-spark-basics-using-spark-shell-in-local/) a Spark.
 ## [Dataset API](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.Dataset)
@@ -57,7 +66,20 @@ Componente Spark per Grafi e calcolo graph-parallel.
 ## [SparkR (R on Spark)](https://spark.apache.org/docs/latest/sparkr.html)
 
 # [Internals](https://jaceklaskowski.gitbooks.io/mastering-apache-spark/spark-overview.html)
+Completa alternativa al map-reduce di Hadoop, molto più performante.
+Alla base dell'ecosistema di `Spark` troviamo `SparkCore`, il quale, a sua volta, è diviso in due parti:
+- __Computer Engine__: fornisce funzioni basilari come gestione della memoria, scheduling dei task, recupero guasti, interagisce con il Cluster Manager (che non viene fornito da Spark).
+- __Spark Core APIS__: consiste in due API:
+    - strutturate: DataFrame e DataSets, ottimizzate per lavorare con dati strutturati
+    - non strutturate: RDDs, variabili Accumulators e Broadcast
 
+Sopra Spark Core troviamo principalmente i 4 moduli descritti sopra:
+- Spark SQL
+- Spark Streaming
+- MLlib
+- GraphX
+
+Offrono API, DLS e algoritmi in più linguaggi. Dipendono direttamente dalla base, ovvero __Spark Core__.
 ## Architettura
 Posso lanciare Spark in essenzialmente due __modalità__:
 - interattiva
@@ -73,7 +95,7 @@ Essenzialmente posso usare Spark con o senza un vero cluster:
 Quando eseguo Spark lo stato dei processi è visibile in una pagina web (Spark UI).
 
 __Chi controlla il cluster? Come Spark ottiene le risorse per driver e executor?__
-Il `cluster manager`.
+Il `cluster manager`, il quale non viene offerto da Apache Spark.
 - __Apache YARN__ per Hadoop
 - __Apache Mesos__ (general purpose)
 - Kubernetes: Google, non per fasi di produzione
