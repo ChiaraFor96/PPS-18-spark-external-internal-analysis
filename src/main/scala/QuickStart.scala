@@ -34,11 +34,10 @@ object QuickStart {
       .groupBy("movieId").count.sort(desc("count")).limit(3)
       .join(movies, "movieId").select("title", "count").show()
 
+    Thread.sleep(20000000) //for see on the spark UI
     sc.sparkSession.close()
   }
   def loadDF(sqlContext: SQLContext, filePath: String): DataFrame = sqlContext.read
-    .format("com.databricks.spark.csv")
-    .option("header", "true")
-    .option("inferSchema", "true")
-    .load(filePath)
+    .options(Map("header" -> "true", "inferSchema" -> "true")) //other options like: mode, timeStampFormat, nullValue
+    .csv(filePath)
 }
