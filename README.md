@@ -68,7 +68,7 @@ Il `cluster manager`, il quale non viene offerto da Apache Spark.
 ### RDDs  e tasks
 Poichè DataSet e DataFrame ereditano da RDDs, capendo questi ultimi possiamo capire come effettivamente viene distribuito il lavoro tra gli executors.
 Quando viene letto un file è possibile specificare il numero di __partizioni di un RDD__ che (guarda caso) coincide con il corrispondente __numero di task__.
-Ovviamente, numero executors e di task sono effettivamente correlati.
+Ovviamente, numero executors e di task sono effettivamente correlati e quindi bisogna specificare il numero di conseguenza.
 
 Si lavora in __stage__, uno stage rappresenta un periodo (una o più funzione chiamata sui dati) in cui non è necessario uno shuffle, ovvero non è necessario spostare i dati tra le partizioni. Se i dati devono muoversi (es. reduceByKey) bisogna ripartizionare i dati (_shuffle & sort_).
 Con `collect` si ritorna dagli executor al driver.
@@ -76,6 +76,33 @@ Con `collect` si ritorna dagli executor al driver.
 Nota interessante, in Scala, DataFrame è così definito [`type DataFrame = Dataset[Row]`](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.package@DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]), ciò 
 significa che su un DataFrame posso chiamare tutti i metodi del Dataset.
 
+## ExecutionModel
+- Crea DAG di RDDs per rappresentare la computazione
+- Crea piano di esecuzione logico del DAG:
+    - pipeline il più possibile
+    - divide in __stages__
+- Schedula e esegue i tasks:
+    - divide ogni stage in task
+    - task = dati + computazione
+    - esegue tutti i task di uno stage prima di andare avanti
+
+## More on Shuffle
+- è pull based e non push based
+- scrive file intermedi nei dischi
+
+Occhio al numero di partizioni.
+Troppe poche: 
+- poca concorrenza
+- più suscettibile a "data skew" %TODO
+- maggiore uso della memoria in operazioni che richiedono Shuffle (groupBy, sortByKey, reduceByKey, etc.)
+Troppe
+Numero considerevole, di solito tra 100 e 10000
+- lower bound, almeno circa il doppio del numero di core di un cluster
+- upper bound: assicurare che un task ci metta almeno 100ms
+
+Problemi di memoria: lentezza e errori, magari perchè si fanno troppi shuffle.
+
+(da vedere https://databricks.com/session/a-deeper-understanding-of-spark-internals da min. 22)
 # Moduli
 ## [RDDs (Resilient Distributed Datasets)](https://spark.apache.org/docs/latest/rdd-programming-guide.html)
 - Concetto di `SparkContext`, uno per JVM.
