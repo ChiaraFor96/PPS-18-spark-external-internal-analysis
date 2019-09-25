@@ -24,56 +24,18 @@ Nelle interrogazioni che lo richiedono vengono passate funzioni, per cui possono
 ## Caching
 Anche su dati distribuiti in molti nodi.
 
-# Moduli
-## [RDDs (Resilient Distributed Datasets)](https://spark.apache.org/docs/latest/rdd-programming-guide.html)
-- Concetto di `SparkContext`, uno per JVM.
-- Modalità di lancio in locale (es. local[4], su 4 core) o su cluster 
-- Concetti principali:
-  - `transformation`: map, sono lazy l'eventuale azione su di essa applicherà la trasformazione. Eventualmente è possibile rendere questi cambiamenti persistenti, altrimenti non lo sono.
-  - `actions`: reduce
-- Passare funzioni a Spark
-- Problema closure (PCD), soluzioni:
-  - `broadcasts`
-  - `accumulators` -> vale sempre il concetto lazy (vedi trasformazioni)
-- printing: collect può fare 'out of memory', concetti simili agli stream (take(n)).
-- shuffle nei nodi
-- caching oltre persistent ci sono anche modalità per specificare a quale memoria attaccarsi.
-
-## [Spark SQL](https://spark.apache.org/docs/latest/sql-programming-guide.html)
-Dati strutturati, maggiori ottimizzazioni rispetto a RDD. Interagisco in vari modi, tra cui SQL e Dataset API.
-Nella computazione viene usato un unico engine di esecuzione, il programmatore può esprire le cose nel modo che ritiene più naturale. Uso di Hive, JDBC, etc. 
-Non credo questo sia interessante sul lato PPS.
-
-## [Structured Streaming over Spark SQL](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html)
-## [Spark Streaming](https://spark.apache.org/docs/latest/streaming-programming-guide.html)
-Dati che provengono da varie fonti (es. Kafka, Flume, Kinesis o TCP sockets) attravestro questo modulo possono essere processati usando algoritmi complessi espressi attravervo funzioni high-level come `map`, `reduce`, `join` and `window`.
-In uscita si avranno File Systems (HDFS), Databases o Dashboard da eventualemente elaborare con le funzioni di spark ML e Graph.
-
-Internamente Spark Streaming diviede lo stream in batch di dati che vengono processati dalla Spark Engine.
-
-Esiste un'astrazione di Spark che si chiama `DStream`, si tratta di dati che provengono da varie fonti (es. Kafka, Flume, and Kinesis) o da operazione ad alto livello su altri DStream.
-Un DStream può essere considerato come una sequenza di RDDs.
-
-## [Machine Learning Library (MLlib)](https://spark.apache.org/docs/latest/ml-guide.html)
-- Algoritmi di Machine Learning: come classificazione, regressione, clustering e collaborative filtering.
-- Featurization: feature extraction, transformation, dimensionality reduction, and selection
-- Pipelines: tools for constructing, evaluating, and tuning ML Pipelines
-- Persistenza: saving and load algorithms, models, and Pipelines
-- Utility: linear algebra, statistics, data handling, etc.
-## [GraphX Programming](https://spark.apache.org/docs/latest/graphx-programming-guide.html#graphx-programming-guide)
-Componente Spark per Grafi e calcolo graph-parallel.
-
-## [SparkR (R on Spark)](https://spark.apache.org/docs/latest/sparkr.html)
-
 # [Internals](https://jaceklaskowski.gitbooks.io/mastering-apache-spark/spark-overview.html)
+
+![Architettura Spark](https://spark.apache.org/images/spark-stack.png)
 Completa alternativa al map-reduce di Hadoop, molto più performante.
 Alla base dell'ecosistema di `Spark` troviamo `SparkCore`, il quale, a sua volta, è diviso in due parti:
+
 - __Computer Engine__: fornisce funzioni basilari come gestione della memoria, scheduling dei task, recupero guasti, interagisce con il Cluster Manager (che non viene fornito da Spark).
 - __Spark Core APIS__: consiste in due API:
     - strutturate: DataFrame e DataSets, ottimizzate per lavorare con dati strutturati
     - non strutturate: RDDs, variabili Accumulators e Broadcast
 
-Sopra Spark Core troviamo principalmente i 4 moduli descritti sopra:
+Sopra Spark Core troviamo principalmente i 4 moduli:
 - Spark SQL
 - Spark Streaming
 - MLlib
@@ -113,3 +75,58 @@ Con `collect` si ritorna dagli executor al driver.
 
 Nota interessante, in Scala, DataFrame è così definito [`type DataFrame = Dataset[Row]`](https://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.sql.package@DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]), ciò 
 significa che su un DataFrame posso chiamare tutti i metodi del Dataset.
+
+# Moduli
+## [RDDs (Resilient Distributed Datasets)](https://spark.apache.org/docs/latest/rdd-programming-guide.html)
+- Concetto di `SparkContext`, uno per JVM.
+- Modalità di lancio in locale (es. local[4], su 4 core) o su cluster 
+- Concetti principali:
+  - `transformation`: map, sono lazy l'eventuale azione su di essa applicherà la trasformazione. Eventualmente è possibile rendere questi cambiamenti persistenti, altrimenti non lo sono.
+  - `actions`: reduce
+- Passare funzioni a Spark
+- Problema closure (PCD), soluzioni:
+  - `broadcasts`
+  - `accumulators` -> vale sempre il concetto lazy (vedi trasformazioni)
+- printing: collect può fare 'out of memory', concetti simili agli stream (take(n)).
+- shuffle nei nodi
+- caching oltre persistent ci sono anche modalità per specificare a quale memoria attaccarsi.
+
+## [Spark SQL](https://spark.apache.org/docs/latest/sql-programming-guide.html)
+Dati strutturati, maggiori ottimizzazioni rispetto a RDD. Interagisco in vari modi, tra cui SQL e Dataset API.
+Nella computazione viene usato un unico engine di esecuzione, il programmatore può esprire le cose nel modo che ritiene più naturale. Uso di Hive, JDBC, etc. 
+Non credo questo sia interessante sul lato PPS.
+
+## [Structured Streaming over Spark SQL](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html)
+## [Spark Streaming](https://spark.apache.org/docs/latest/streaming-programming-guide.html)
+Dati che provengono da varie fonti (es. Kafka, Flume, Kinesis o TCP sockets) attravestro questo modulo possono essere processati usando algoritmi complessi espressi attravervo funzioni high-level come `map`, `reduce`, `join` and `window`.
+In uscita si avranno File Systems (HDFS), Databases o Dashboard da eventualemente elaborare con le funzioni di spark ML e Graph.
+
+Internamente Spark Streaming divide lo stream in batch di dati che vengono processati dalla Spark Engine.
+
+La lettura di uno streaming eredita dall'astrazione `DStream`, si tratta di dati che provengono da varie fonti (es. Kafka, Flume, and Kinesis) o da operazione ad alto livello su altri DStream.
+Un DStream può essere considerato come una sequenza di RDDs.
+Le __operazioni su un DStream__, molto simili a quelle su un RDD, funzioni proprie si possono applicare 
+solo attraverso quelle fornite dall'API, non dovrebbero esserci limitazioni.
+DStream estende Serializable.
+
+## [Machine Learning Library (MLlib)](https://spark.apache.org/docs/latest/ml-guide.html)
+- Algoritmi di Machine Learning: come classificazione, regressione, clustering e collaborative filtering.
+- Featurization: feature extraction, transformation, dimensionality reduction, and selection
+- Pipelines: tools for constructing, evaluating, and tuning ML Pipelines
+- Persistenza: saving and load algorithms, models, and Pipelines
+- Utility: linear algebra, statistics, data handling, etc.
+## [GraphX Programming](https://spark.apache.org/docs/latest/graphx-programming-guide.html#graphx-programming-guide)
+Componente Spark per Grafi e calcolo graph-parallel che si trova sopra SparkCore.
+
+![Passaggio SparkCore/GraphX](https://spark.apache.org/docs/1.2.1/img/graph_analytics_pipeline.png)
+
+Ad alto livello viene estratto il concetto di RDD introducendo l'estensione Graph.
+Ci sono varie operazioni a supporto di questo concetto, anche algoritmi e builder per l'analisi.
+
+Quindi userei questa estensione quando nella natura dei grafi ci sono legami che vengono meglio rappresentati da un grafo,
+prima di dare in pasto i dati a GraphX potrebbero servire minime operazioni per renderli "compatibili" con la visione a grafo.
+Nella costruzione vengono richiesti:
+- RDD dei vertici
+- RDD degli edge
+- un vertice di default (pozzo).
+## [SparkR (R on Spark)](https://spark.apache.org/docs/latest/sparkr.html)
