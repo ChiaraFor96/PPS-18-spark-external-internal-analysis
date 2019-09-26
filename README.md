@@ -170,6 +170,7 @@ Spark Streaming non riesce a lavorare con il tempo dell'evento, ma solo con l'ev
 
 Con Spark Streaming, non ci sono restrizioni per utilizzare qualsiasi tipo di sink (`foreachRDD`).
 
+[Deep](https://medium.com/@kevin_hartman/spark-streaming-transformations-a-deep-dive-b82787e53288)
 ## [Machine Learning Library (MLlib)](https://spark.apache.org/docs/latest/ml-guide.html)
 - Algoritmi di Machine Learning: come classificazione, regressione, clustering e collaborative filtering.
 - Featurization: feature extraction, transformation, dimensionality reduction, and selection
