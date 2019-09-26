@@ -124,8 +124,30 @@ Nella computazione viene usato un unico engine di esecuzione, il programmatore p
 Non credo questo sia interessante sul lato PPS.
 
 ## [Structured Streaming over Spark SQL](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html)
+Streaming strutturato.
+
+Non c'è il concetto di batch di Spark Streaming, assomiglia più a uno stream Real Time.
+
+I dati vengono sostanzialmente aggiunti a una tabella potenzialemnte infinita, la modalità in cui si recuperano può essere: Complete, Update o Append.
+
+Vengono usati DataFrames e Dataset, [benchmarks](https://blog.knoldus.com/spark-rdd-vs-dataframes/) 
+dimostrano che i DataFrames sono più ottimizzati in termini di elaborazione e forniscono più opzioni per aggregazioni 
+e altre operazioni con una varietà di funzioni disponibili (molte più funzioni sono ora supportate nativamente in Spark 2.4).
+
+Riesce a lavorare con il tempo dell'evento, cosa che non fa Spark Streaming.
+Per cui è più adatto al mondo reale.
+
+Oltre al checkpointing per ripristinare la condizione dagli errori, usato anche da Spark Streaming, usa due condizioni:
+- La fonte deve essere riproducibile.
+- I sink devono supportare operazioni idempotenti per supportare il ritrattamento in caso di guasti.
+
+Sink, ovvero destinazione di un'operazione di streaming, può essere una memoria esterna, un semplice output per console o qualsiasi azione.
+
+Con Spark 2.4 lo Structured Streaming ha superato i limiti restringenti che aveva in precedenza sul numero di sink, introducendo un sink `foreachBatch`, questo fornisce la tabella di output risultante
+con DataFrame per eseguire operazioni custom.
+
 ## [Spark Streaming](https://spark.apache.org/docs/latest/streaming-programming-guide.html)
-Dati che provengono da varie fonti (es. Kafka, Flume, Kinesis o TCP sockets) attravestro questo modulo possono essere processati usando algoritmi complessi espressi attravervo funzioni high-level come `map`, `reduce`, `join` and `window`.
+Dati che provengono da varie fonti (es. Kafka, Flume, Kinesis o TCP sockets) attraverso questo modulo possono essere processati usando algoritmi complessi espressi attravervo funzioni high-level come `map`, `reduce`, `join` e `window`.
 In uscita si avranno File Systems (HDFS), Databases o Dashboard da eventualemente elaborare con le funzioni di spark ML e Graph.
 
 Internamente Spark Streaming divide lo stream in batch di dati che vengono processati dalla Spark Engine.
@@ -133,8 +155,20 @@ Internamente Spark Streaming divide lo stream in batch di dati che vengono proce
 La lettura di uno streaming eredita dall'astrazione `DStream`, si tratta di dati che provengono da varie fonti (es. Kafka, Flume, and Kinesis) o da operazione ad alto livello su altri DStream.
 Un DStream può essere considerato come una sequenza di RDDs.
 Le __operazioni su un DStream__, molto simili a quelle su un RDD, funzioni proprie si possono applicare 
-solo attraverso quelle fornite dall'API, non dovrebbero esserci limitazioni.
-DStream estende Serializable.
+solo attraverso quelle fornite dall'API, non dovrebbero esserci limitazioni...//TODO
+
+*oggi: [5G e Spark Streaming](https://www.ericsson.com/en/blog/2019/6/applying-the-spark-streaming-framework-to-5g)*
+
+- [Apache Storm vs Spark Streaming](http://www.slideshare.net/ptgoetz/apache-storm-vs-spark-streaming)
+- [Spark Streaming vs Flink vs Storm vs Kafka Streams vs Samza](https://medium.com/@chandanbaranwal/spark-streaming-vs-flink-vs-storm-vs-kafka-streams-vs-samza-choose-your-stream-processing-91ea3f04675b)
+- [Limiti di Spark Streaming](https://stackoverflow.com/questions/35691172/whats-the-limit-to-spark-streaming-in-terms-of-data-amount)
+- Importante: [ Non è stream processing ](https://sqlstream.com/5-reasons-why-spark-streamings-batch-processing-of-data-streams-is-not-stream-processing/)
+micro batch = maggiori performance
+- Errori: serve supporto sotto che replichi dati
+
+Spark Streaming non riesce a lavorare con il tempo dell'evento, ma solo con l'evento di Spark.
+
+Con Spark Streaming, non ci sono restrizioni per utilizzare qualsiasi tipo di sink (`foreachRDD`).
 
 ## [Machine Learning Library (MLlib)](https://spark.apache.org/docs/latest/ml-guide.html)
 - Algoritmi di Machine Learning: come classificazione, regressione, clustering e collaborative filtering.
@@ -157,3 +191,5 @@ Nella costruzione vengono richiesti:
 - RDD degli edge
 - un vertice di default (pozzo).
 ## [SparkR (R on Spark)](https://spark.apache.org/docs/latest/sparkr.html)
+
+#[Limiti](https://www.whizlabs.com/blog/apache-spark-limitations/)
