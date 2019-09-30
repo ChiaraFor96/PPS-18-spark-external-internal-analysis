@@ -124,6 +124,8 @@ Nella computazione viene usato un unico engine di esecuzione, il programmatore p
 Non credo questo sia interessante sul lato PPS.
 
 ## [Structured Streaming over Spark SQL](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html)
+![Structured Streaming](https://i.stack.imgur.com/krczM.png)
+
 Streaming strutturato, costruito sopra a Spark SQL e dunque con supporto a DataFrame e DataSet. 
 
 N.B.: Dei [benchmarks](https://blog.knoldus.com/spark-rdd-vs-dataframes/) 
@@ -171,12 +173,13 @@ Con Spark 2.4 lo Structured Streaming ha superato i limiti restringenti che avev
 con DataFrame per eseguire operazioni custom.
 
 ## [Spark Streaming](https://spark.apache.org/docs/latest/streaming-programming-guide.html)
+![Spark Streaming](https://spark.apache.org/docs/latest/img/streaming-arch.png)
 Dati che provengono da varie fonti (es. Kafka, Flume, Kinesis o TCP sockets, file) attraverso questo modulo possono essere processati usando algoritmi complessi espressi attravervo funzioni high-level come `map`, `reduce`, `join` e `window`.
 In uscita si avranno File Systems (HDFS), Databases o Dashboard da eventualemente elaborare con le funzioni di spark ML e Graph.
 
 Internamente Spark Streaming divide lo stream in batch di dati che vengono processati dalla Spark Engine.
 
-La lettura di uno streaming eredita dall'astrazione `DStream`, si tratta di dati che provengono da varie fonti (es. Kafka, Flume, and Kinesis) o da operazione ad alto livello su altri DStream.
+La lettura di uno streaming avviene tramite un __Receiver__ ed eredita dall'astrazione `DStream`, si tratta di dati che provengono da varie fonti (es. Kafka, Flume, and Kinesis) o da operazione ad alto livello su altri DStream.
 Un DStream può essere considerato come una sequenza di RDDs.
 
 Fondamentale è la definizione di un `Batch interval`, esso indica la 
