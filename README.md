@@ -124,38 +124,77 @@ Nella computazione viene usato un unico engine di esecuzione, il programmatore p
 Non credo questo sia interessante sul lato PPS.
 
 ## [Structured Streaming over Spark SQL](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html)
-Streaming strutturato.
+Streaming strutturato, costruito sopra a Spark SQL e dunque con supporto a DataFrame e DataSet. 
+
+N.B.: Dei [benchmarks](https://blog.knoldus.com/spark-rdd-vs-dataframes/) 
+dimostrano che i DataFrames sono più ottimizzati in termini di elaborazione e forniscono più opzioni per aggregazioni 
+e altre operazioni con una varietà di funzioni disponibili (molte più funzioni sono ora supportate nativamente in Spark 2.4).
 
 Non c'è il concetto di batch di Spark Streaming, assomiglia più a uno stream Real Time.
 
-I dati vengono sostanzialmente aggiunti a una tabella potenzialemnte infinita, la modalità in cui si recuperano può essere: Complete, Update o Append.
+I dati vengono sostanzialmente aggiunti a una tabella potenzialemnte infinita, composta da una sola colonna 'value' (DataSet<Row>), 
+la quale tramite le funzionalità di SparkSQL verrà trasformata nelle colonne opportune.
 
-Vengono usati DataFrames e Dataset, [benchmarks](https://blog.knoldus.com/spark-rdd-vs-dataframes/) 
-dimostrano che i DataFrames sono più ottimizzati in termini di elaborazione e forniscono più opzioni per aggregazioni 
-e altre operazioni con una varietà di funzioni disponibili (molte più funzioni sono ora supportate nativamente in Spark 2.4).
+Per connettersi alle risorse dati bisogna:
+- Creare una SparkSession
+- chiamare il metodo readStream() su questa
+- .format() per specificare il tipo di dato (es. Kafka, Socket, File)
+- .options per eventuali opzioni come host e porta
+
+I dati ottenuti hanno come sink: kafka, file, memoria, console
+
+Ottengo dati in ogni momento.
+La modalità in cui si recuperano può essere: 
+- Complete
+- Append
+- Update
+
+Le modalità di triggering:
+- default
+- fixed
+- one time
+
+Operazioni supportate:
+- funzioni di base di SparkSQL 
+- Window based sliding
+- __[UDF](https://jaceklaskowski.gitbooks.io/mastering-spark-sql/spark-sql-udfs.html)__ - User defined functions
+
 
 Riesce a lavorare con il tempo dell'evento, cosa che non fa Spark Streaming.
 Per cui è più adatto al mondo reale.
 
 Oltre al checkpointing per ripristinare la condizione dagli errori, usato anche da Spark Streaming, usa due condizioni:
-- La fonte deve essere riproducibile.
+- La fonti deve essere riproducibili.
 - I sink devono supportare operazioni idempotenti per supportare il ritrattamento in caso di guasti.
-
-Sink, ovvero destinazione di un'operazione di streaming, può essere una memoria esterna, un semplice output per console o qualsiasi azione.
 
 Con Spark 2.4 lo Structured Streaming ha superato i limiti restringenti che aveva in precedenza sul numero di sink, introducendo un sink `foreachBatch`, questo fornisce la tabella di output risultante
 con DataFrame per eseguire operazioni custom.
 
 ## [Spark Streaming](https://spark.apache.org/docs/latest/streaming-programming-guide.html)
-Dati che provengono da varie fonti (es. Kafka, Flume, Kinesis o TCP sockets) attraverso questo modulo possono essere processati usando algoritmi complessi espressi attravervo funzioni high-level come `map`, `reduce`, `join` e `window`.
+Dati che provengono da varie fonti (es. Kafka, Flume, Kinesis o TCP sockets, file) attraverso questo modulo possono essere processati usando algoritmi complessi espressi attravervo funzioni high-level come `map`, `reduce`, `join` e `window`.
 In uscita si avranno File Systems (HDFS), Databases o Dashboard da eventualemente elaborare con le funzioni di spark ML e Graph.
 
 Internamente Spark Streaming divide lo stream in batch di dati che vengono processati dalla Spark Engine.
 
 La lettura di uno streaming eredita dall'astrazione `DStream`, si tratta di dati che provengono da varie fonti (es. Kafka, Flume, and Kinesis) o da operazione ad alto livello su altri DStream.
 Un DStream può essere considerato come una sequenza di RDDs.
+
+Fondamentale è la definizione di un `Batch interval`, esso indica la 
+durata secondo la quale uno Spark Streaming Job immagazzina dati e per cui in ogni intervallo ci sarà un DStream differente.
+Questo concetto fa capire la forte nota di Spark Streaming nel lavorare in micro batch e non in real time.
+
 Le __operazioni su un DStream__, molto simili a quelle su un RDD, funzioni proprie si possono applicare 
-solo attraverso quelle fornite dall'API, non dovrebbero esserci limitazioni...//TODO
+solo attraverso quelle fornite dall'API, questo è limitante rispetto allo Structured Stream.
+
+Per usare Spark Streaming è necessario definire uno SparkStreamingContext, per il quale bisogna definire uno StreamingContext e un BatchInterval.
+Attraverso dei metodi preposti in questa struttura verranno consumati dati e creati di conseguenza i relativi DStream.
+
+A volte non basta considerare un intervallo, ma è più opportuno considerare una finestra, per cui si passa da una transformazione Stateless in cui vengono scartati da batch precedenti) a una 
+trasformazione Stateful. In particolare con lo __sliding windows__ vengono aggregati DStream appartanenti a intervalli diversi.
+Ci sono due ulteriori parametri, oltre al batch interval, da tarare:
+- __window size__: multiplo di batch interval, indica l'ampiezza temporale della finestra
+- __slide window dimension__: indica quanta distanza temporale c'è tra una window e la successiva, anche
+esso è multiplo del batch interval e potenzialmente potrebbero esserci finestre sovrapposte.
 
 *oggi: [5G e Spark Streaming](https://www.ericsson.com/en/blog/2019/6/applying-the-spark-streaming-framework-to-5g)*
 
@@ -169,6 +208,7 @@ micro batch = maggiori performance
 Spark Streaming non riesce a lavorare con il tempo dell'evento, ma solo con l'evento di Spark.
 
 Con Spark Streaming, non ci sono restrizioni per utilizzare qualsiasi tipo di sink (`foreachRDD`).
+La novità e il maggior supporto sembra si in Spark Structured Streaming.
 
 [Deep](https://medium.com/@kevin_hartman/spark-streaming-transformations-a-deep-dive-b82787e53288)
 ## [Machine Learning Library (MLlib)](https://spark.apache.org/docs/latest/ml-guide.html)
