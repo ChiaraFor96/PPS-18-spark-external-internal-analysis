@@ -12,15 +12,14 @@ object QuickStart {
   import org.apache.spark.sql.{Column, DataFrame, SQLContext, SparkSession}
 
   def main ( args: Array[String] ): Unit = {
-    import org.apache.log4j.Logger
-    Logger.getLogger ( "org" ).setLevel ( Level.OFF )
-    Logger.getLogger ( "akka" ).setLevel ( Level.OFF )
+    val log = org.apache.log4j.Logger.getLogger ( getClass.getName )
 
-    val log = Logger.getLogger ( getClass.getName )
     val sc = SparkSession.builder ().appName ( "Quick start" )
       .master ( "local[*]" )
       .config ( "spark.hadoop.dfs.client.use.datanode.hostname", "true" )
       .getOrCreate ().sqlContext
+
+    sc.sparkContext.setLogLevel("ERROR")
 
     val movies = loadDF ( sc, "hdfs://hadoop:9000/ml-latest-small/movies.csv" )
     log.info ( s"There are: ${movies.count ()} movies" )
