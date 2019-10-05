@@ -127,12 +127,15 @@ Non credo questo sia interessante sul lato PPS.
 ![Structured Streaming](https://i.stack.imgur.com/krczM.png)
 
 Streaming strutturato, costruito sopra a Spark SQL e dunque con supporto a DataFrame e DataSet. 
+Sostanzialmente riuso totale del codice scritto per interrogazioni statiche su SparkSQL.
 
 N.B.: Dei [benchmarks](https://blog.knoldus.com/spark-rdd-vs-dataframes/) 
 dimostrano che i DataFrames sono più ottimizzati in termini di elaborazione e forniscono più opzioni per aggregazioni 
 e altre operazioni con una varietà di funzioni disponibili (molte più funzioni sono ora supportate nativamente in Spark 2.4).
 
 Non c'è il concetto di batch di Spark Streaming, assomiglia più a uno stream Real Time.
+In ogni caso sotto va a micro batch, dalla versione 2.3 di spark è stato aggiunto il concetto 
+di `Continuous Processing` che ha ridotto ulteriormente la latenza.
 
 I dati vengono sostanzialmente aggiunti a una tabella potenzialemnte infinita, composta da una sola colonna 'value' (DataSet<Row>), 
 la quale tramite le funzionalità di SparkSQL verrà trasformata nelle colonne opportune.
@@ -143,19 +146,29 @@ Per connettersi alle risorse dati bisogna:
 - .format() per specificare il tipo di dato (es. Kafka, Socket, File)
 - .options per eventuali opzioni come host e porta
 
-I dati ottenuti hanno come sink: kafka, file, memoria, console
+I dati ottenuti hanno come sink (writeStream): kafka, file, memoria, console
+Nota: con il writeStream usando `foreach` e `foreachBatch` è possibile fare quello che voglio,
+salvare su fonti già presenti, salvare su più fonti.
+Concetto di __trigger__: One-time micro-batch
 
 Ottengo dati in ogni momento.
-La modalità in cui si recuperano può essere: 
-- Complete
-- Append
-- Update
+La modalità in cui si recuperano può essere (dipendentemente dall'interrogazione): 
+- Complete: per ottenere l'output completo di ogni aggiornamento
+- Append: solo righe aggiunte
+- Update: solo righe aggiornate
+
+Importante: non viene materializzata l'intera tabella, man mano che vengono interrogati
+i dati vengono scartati. 
+
+Questo modello è molto differente da altre engine di streaming, molte richiedono all'utente stesso
+di mantenere aggregazioni sui dati precedenti e sulla loro coerenza.
+In questo modello se ne occupa spark e il tutto sembra trasparente all'utente.
 
 Le modalità di triggering:
-- default
+- default o micro batch mode
 - fixed
 - one time
-
+- Continuous with fixed checkpoint interval (experimental): continuos processing mode
 Operazioni supportate:
 - funzioni di base di SparkSQL 
 - Window based sliding
@@ -163,14 +176,47 @@ Operazioni supportate:
 
 
 Riesce a lavorare con il tempo dell'evento, cosa che non fa Spark Streaming.
-Per cui è più adatto al mondo reale.
+Per cui è più adatto al mondo reale, es. IoT.
+In caso di ritardi è Spark stesso a preoccuparsi di aggiornare e rimanere con l'event time corretto.
+Da Spark 2.1 c'è il `watermarking` che permette all'utente di definire una soglia dei dati in ritardo,
+e consente, di conseguenza, all'engine di ripulire il vecchio stato.
+Occhio alle dimensioni di questo valore, se troppo grande può creare problemi di memoria / performance.
+Questo è molto importante, delle tipologie di sink non lo supportano in update ma solo in append in modo 
+che tutto venga scritto alla fine.
 
+Assicura `end-to-end exactly-once semantics` sotto ogni failure.
 Oltre al checkpointing per ripristinare la condizione dagli errori, usato anche da Spark Streaming, usa due condizioni:
 - La fonti deve essere riproducibili.
 - I sink devono supportare operazioni idempotenti per supportare il ritrattamento in caso di guasti.
 
 Con Spark 2.4 lo Structured Streaming ha superato i limiti restringenti che aveva in precedenza sul numero di sink, introducendo un sink `foreachBatch`, questo fornisce la tabella di output risultante
 con DataFrame per eseguire operazioni custom.
+
+### Join
+Si possono fare join (inner, outer, etc.) incrementali con altri DataFrame o Dataset, siano essi statici o non.
+[Ancora non c'è un supporto completo](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#support-matrix-for-joins-in-streaming-queries).
+
+Questa è una delle sfide di questo modulo, è difficile fare join su dati che sono
+incerti e che possono arrivare in qualsiasi momento. 
+Come nello streaming, c'è un `watermark delay` per mantenere i dati oppure una `event-time range condition` per dire che un certo dato può arrivare in un certo range di tempo.
+
+#### Deduplicazione dei record
+è possibile deduplicare i record usando un identificatore univoco per gli eventi.
+Si può fare:
+- con __watemark__: se esiste un limite superiore di record duplicati e una colonna di timestamp, vengono
+eliminati vi vecchi record una volta superato il watermark.
+- senza watermark: lo stato è composto da tutti i dati.
+
+Se con più streami ci sono conflitti di più watermark, di norma viene scelto globalmente il valore
+più basso. Dato che le necessità possono essere diverse, da Spark 2.4 si può
+settare nella configurazione la policy (max o min).
+
+### Arbitrary Stateful Operations
+`mapGroupsWithState` e `flatMapGroupsWithState` permettono di usare le UDF su Dataset aggregati per aggiornare lo stato definito dall'utente.
+
+### [Operazioni non supportate](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#unsupported-operations)
+
+### Api per l'esecuzione delle query e StreamingQueryListener
 
 ## [Spark Streaming](https://spark.apache.org/docs/latest/streaming-programming-guide.html)
 ![Spark Streaming](https://spark.apache.org/docs/latest/img/streaming-arch.png)
