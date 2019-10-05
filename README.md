@@ -173,7 +173,17 @@ Operazioni supportate:
 - funzioni di base di SparkSQL 
 - Window based sliding
 - __[UDF](https://jaceklaskowski.gitbooks.io/mastering-spark-sql/spark-sql-udfs.html)__ - User defined functions
+.. => normalissime funzioni scala definite dall'utente, si possono tranquillamente considerare come 
+"black box". Il tutto ha un senso unificato all'utilizzo di case class definite dall'utente rappresentative
+dei record. Qui nasce il forte senso di structured streaming e assieme al concetto di tempo è qui che secondo
+me c'è il netto distacco con Spark Streaming.
+MA occhio all'uso di UDF, vedere i piani di esecuzione capire se effettivamente essendo scatole nere
+ottimizzano l'esecuzione o essa può essere resa meno leggibile ma più performante e comunque eseguibile con
+i meccanismi offerti da spark / spark sql.
+Sono registrabili anche globalmente nella sessione.
 
+- [UDAF](https://jaceklaskowski.gitbooks.io/mastering-spark-sql/spark-sql-UserDefinedAggregateFunction.html)
+//TODO
 
 Riesce a lavorare con il tempo dell'evento, cosa che non fa Spark Streaming.
 Per cui è più adatto al mondo reale, es. IoT.
