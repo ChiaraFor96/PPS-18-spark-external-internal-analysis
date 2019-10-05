@@ -4,32 +4,31 @@ import org.apache.spark.streaming.receiver.Receiver
 object SparkStreaming {
 
   import org.apache.spark.SparkConf
-  import org.apache.spark.streaming.{Seconds, StreamingContext}
+  import org.apache.spark.streaming.{Minutes, Seconds, StreamingContext}
 
   def main ( args: Array[String] ): Unit = {
-    import org.apache.log4j.{Level, Logger}
-    val log = Logger.getLogger ( getClass.getName )
+    val log = org.apache.log4j.Logger.getLogger ( getClass.getName )
 
     val sc = new SparkConf ().setAppName ( "Spark streaming example" ).setMaster ( "local[*]" )
     val batchInterval = Seconds ( 1 )
     val threshold3 = 100
     val ssc = new StreamingContext ( sc, batchInterval )
-    ssc.sparkContext.setLogLevel("ERROR")
+    ssc.sparkContext.setLogLevel ( "ERROR" )
     //define 4 streaming
     import org.apache.spark.storage.StorageLevel._
     //ssc.socketTextStream("localhost", 9999) //started with nc -l -p 9999 localhost
-    val s1 = ssc.receiverStream(new InfiniteStreamReceiver(Stream.from(-100), 500, storageLevel = MEMORY_ONLY))
-    val s2 = ssc.receiverStream(new InfiniteStreamReceiver(Stream.from(100), 500, storageLevel = MEMORY_ONLY))
-    val s3 = ssc.receiverStream ( new InfiniteStreamReceiver ( Stream from(100), 200, storageLevel = MEMORY_ONLY ) )
-    val s4 = ssc.receiverStream(new InfiniteStreamReceiver(Stream.from(100), 220, storageLevel = MEMORY_ONLY))
+    val s1 = ssc.receiverStream ( new InfiniteStreamReceiver ( Stream.from ( -100 ), 500, storageLevel = MEMORY_ONLY ) )
+    val s2 = ssc.receiverStream ( new InfiniteStreamReceiver ( Stream.from ( 100 ), 500, storageLevel = MEMORY_ONLY ) )
+    val s3 = ssc.receiverStream ( new InfiniteStreamReceiver ( Stream from (100), 200, storageLevel = MEMORY_ONLY ) )
+    val s4 = ssc.receiverStream ( new InfiniteStreamReceiver ( Stream.from ( 100 ), 220, storageLevel = MEMORY_ONLY ) )
 
     //do this actions in loop for each new data incoming in batch interval
-    s1.union(s2).map(v => s"Value of one of first two stream $v").print
+    s1.union ( s2 ).map ( v => s"Value of one of first two stream $v" ).print
+// TODO check if it works
+    s3 window Minutes ( 1 ) foreachRDD (( rdd ) => log.info ( rdd.map { case x: Int if x < threshold3 => "alert" } ))
+    // .filter ( _ > threshold3 ).count
 
-    //s3.window(batchInterval * 3, batchInterval * 2 ).foreachRDD((rdd, t) => log.info("# " + (t.milliseconds, rdd.mean)))
-     // .filter ( _ > threshold3 ).count
-
-    s4.map(x => s"Sensor4: $x").print
+    s4.map ( x => s"Sensor4: $x" ).print
 
     //start context
     ssc.start ()
@@ -43,6 +42,7 @@ object SparkStreaming {
         override def run ( ): Unit = {
           stream.takeWhile { _ => Thread.sleep ( delay ); !isStopped }.foreach ( store )
         }
+
         setDaemon ( true )
       }.start ()
     }
