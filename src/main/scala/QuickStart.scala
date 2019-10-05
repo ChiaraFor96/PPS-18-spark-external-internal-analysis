@@ -11,7 +11,7 @@ object QuickStart {
 
   def main ( args: Array[String] ): Unit = {
     val log = org.apache.log4j.Logger.getLogger ( getClass.getName )
-
+// TODO try in cluster!
     val sc = SparkSession.builder ().appName ( "Quick start" )
       .master ( "local[*]" )
       .config ( "spark.hadoop.dfs.client.use.datanode.hostname", "true" )
