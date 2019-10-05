@@ -1,5 +1,3 @@
-import org.apache.log4j.Level
-
 /*
 launch notes:
 - add '127.0.0.1   localhost   hadoop' in etc/hosts
