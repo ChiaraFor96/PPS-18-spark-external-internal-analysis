@@ -169,6 +169,8 @@ Le modalità di triggering:
 - fixed
 - one time
 - Continuous with fixed checkpoint interval (experimental): continuos processing mode
+
+
 Operazioni supportate:
 - funzioni di base di SparkSQL 
 - Window based sliding
@@ -179,7 +181,9 @@ dei record. Qui nasce il forte senso di structured streaming e assieme al concet
 me c'è il netto distacco con Spark Streaming.
 MA occhio all'uso di UDF, vedere i piani di esecuzione capire se effettivamente essendo scatole nere
 ottimizzano l'esecuzione o essa può essere resa meno leggibile ma più performante e comunque eseguibile con
-i meccanismi offerti da spark / spark sql.
+i meccanismi offerti da spark / spark sql...inoltre udf ha problemi di seriazzazione, 
+ogni volta deve deserializzare e serializzare le colonne, quando possibile 
+preferire le funzioni builtin che in SparkSQL non sono poche (org.apache.spark.sql.functions).
 Sono registrabili anche globalmente nella sessione.
 
 - [UDAF](https://jaceklaskowski.gitbooks.io/mastering-spark-sql/spark-sql-UserDefinedAggregateFunction.html)
