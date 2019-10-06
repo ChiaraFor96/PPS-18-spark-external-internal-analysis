@@ -231,7 +231,7 @@ settare nella configurazione la policy (max o min).
 ### [Operazioni non supportate](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#unsupported-operations)
 
 ### Api per l'esecuzione delle query e StreamingQueryListener
-
+[More](https://www.slideshare.net/databricks/realtime-spark-from-interactive-queries-to-streaming)
 ## [Spark Streaming](https://spark.apache.org/docs/latest/streaming-programming-guide.html)
 ![Spark Streaming](https://spark.apache.org/docs/latest/img/streaming-arch.png)
 Dati che provengono da varie fonti (es. Kafka, Flume, Kinesis o TCP sockets, file) attraverso questo modulo possono essere processati usando algoritmi complessi espressi attravervo funzioni high-level come `map`, `reduce`, `join` e `window`.
