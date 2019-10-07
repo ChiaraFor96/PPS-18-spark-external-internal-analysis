@@ -30,6 +30,7 @@ object SparkStructuredStreaming {
           */
     val dataFrame1 = getRateDataFrame
     val dataFrame2 = getRateDataFrame
+    val dataFrame3 = getRateDataFrame
 
     dataFrame1.isStreaming
     dataFrame1.printSchema
@@ -45,28 +46,41 @@ object SparkStructuredStreaming {
 
     val dataset1 = getDataset ( dataFrame1 )
     val dataset2 = getDataset ( dataFrame2 )
+    val dataset3 = getDataset ( dataFrame3 )
 
     //group by key and count
     dataset1
-      .withWatermark ( "timestamp", "10 seconds" )
-      .groupBy (
-        window ( $"timestamp", "10 seconds", "5 seconds" ),
-        $"value" )
-      .count
-      .sort ( 'value )
+
+
+    //udf function
+    dataset1.select ( udf { s: StreamType => s.hashCode }.apply ( 'value ).as ( "hash code" ) )
       .writeStream
-      .trigger ( Trigger.ProcessingTime ( "2 seconds" ) ) //Trigger fixed
-      .outputMode ( "complete" )
+      //.trigger ( Trigger.Continuous("5 seconds") ) //use experimental CP (in Spark 2.3+).. don't work :)
       .format ( "console" )
       .start
 
-    //udf function
-    dataset1.select ( udf { s: StreamType => s.hashCode }.apply ( 'value ).as ( "hash code" ) ).writeStream.format ( "console" ).start
-
     //join 2 Dataset
-    dataset1.join ( dataset2, "value" ).select ( "*" ).writeStream.format ( "console" ).start
+    dataset1.join ( dataset2, "timestamp" )
+      .join(dataset3, "timestamp")
+      .drop(dataFrame2.col("value")) //TODO aggregate COLUMNS VALUE
+      .drop(dataFrame3.col("value"))
+      .select("*")
+     /* .withWatermark ( "timestamp", "10 seconds" )
+      .groupBy (
+        window ( $"timestamp", "10 seconds", "5 seconds" )
+       /* ,$"value"*/ )
+      .count
+      //.sort ( 'value )
+      *
+      */
+      .writeStream
+      .format ( "console" )
+      // .outputMode ( "complete" ) not here..
+      .trigger(Trigger.ProcessingTime ( "2 seconds" ) ) //fixed trigger, CP not supported in JOIN
+      .start
 
     //await any computation
     spark.streams.awaitAnyTermination
   }
+  //TODO refactor seconds!!!
 }
