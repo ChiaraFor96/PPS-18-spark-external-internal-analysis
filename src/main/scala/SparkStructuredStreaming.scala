@@ -1,16 +1,13 @@
-import org.apache.spark.sql.streaming.Trigger
-import org.apache.spark.sql.{DataFrame, Dataset}
-
 object SparkStructuredStreaming {
-
-  import org.apache.spark.sql.SparkSession
   import org.apache.spark.sql.execution.streaming.FileStreamSource.Timestamp
-  import org.apache.spark.sql.functions._
 
   type StreamType = Long
   case class StreamRecord ( value: StreamType, timestamp: Timestamp, length: Int )
 
   def main ( args: Array[String] ): Unit = {
+    import org.apache.spark.sql.functions._
+    import org.apache.spark.sql.streaming.Trigger
+    import org.apache.spark.sql.{DataFrame, SparkSession, Dataset}
     //val log = org.apache.log4j.Logger.getLogger ( getClass.getName )
 
     val spark = SparkSession.builder.appName ( "Structured Streaming" )
@@ -23,6 +20,7 @@ object SparkStructuredStreaming {
         .format ( "rate" ) //produce data for testing
         .option ( "rowsPerSecond", 10 )
         .load
+      //can also define the schema
     }
 
     /*val socketDF = spark.readStream
