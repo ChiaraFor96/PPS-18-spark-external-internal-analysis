@@ -7,7 +7,8 @@ object SparkStructuredStreaming {
   import org.apache.spark.sql.execution.streaming.FileStreamSource.Timestamp
   import org.apache.spark.sql.functions._
 
-  type StreamType = String
+  type StreamType = Long
+  case class StreamRecord ( value: StreamType, timestamp: Timestamp, length: Int )
 
   def main ( args: Array[String] ): Unit = {
     //val log = org.apache.log4j.Logger.getLogger ( getClass.getName )
@@ -70,6 +71,4 @@ object SparkStructuredStreaming {
     //await any computation
     spark.streams.awaitAnyTermination
   }
-
-  case class StreamRecord ( value: StreamType, timestamp: Timestamp, length: Int )
 }
