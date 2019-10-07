@@ -232,6 +232,9 @@ settare nella configurazione la policy (max o min).
 
 ### Api per l'esecuzione delle query e StreamingQueryListener
 [More](https://www.slideshare.net/databricks/realtime-spark-from-interactive-queries-to-streaming)
+
+NB: [Continuos processing](https://databricks.com/blog/2018/03/20/low-latency-continuous-processing-mode-in-structured-streaming-in-apache-spark-2-3-0.html) va a usare Chandy Lamport
+==> PCD
 ## [Spark Streaming](https://spark.apache.org/docs/latest/streaming-programming-guide.html)
 ![Spark Streaming](https://spark.apache.org/docs/latest/img/streaming-arch.png)
 Dati che provengono da varie fonti (es. Kafka, Flume, Kinesis o TCP sockets, file) attraverso questo modulo possono essere processati usando algoritmi complessi espressi attravervo funzioni high-level come `map`, `reduce`, `join` e `window`.
