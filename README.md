@@ -207,7 +207,7 @@ Con Spark 2.4 lo Structured Streaming ha superato i limiti restringenti che avev
 con DataFrame per eseguire operazioni custom.
 
 ### Join
-Si possono fare join (inner, outer, etc.) incrementali con altri DataFrame o Dataset, siano essi statici o non.
+Si possono fare [join](https://docs.databricks.com/_static/notebooks/stream-stream-joins-scala.html) (inner, outer, etc.) incrementali con altri DataFrame o Dataset, siano essi statici o non.
 [Ancora non c'è un supporto completo](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#support-matrix-for-joins-in-streaming-queries).
 
 Questa è una delle sfide di questo modulo, è difficile fare join su dati che sono
