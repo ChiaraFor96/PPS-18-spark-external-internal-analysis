@@ -13,22 +13,22 @@ object SparkStructuredStreaming {
     val dataset3 = getDataset ( 30 )
 
     //udf function
-    /*dataset1.select ( udf { s: StreamValueType => s.hashCode }.apply( valueColumn ).as ( "hash code" ) )
+    dataset1.select ( udf { s: Long => s.hashCode }.apply( idColumn ).as ( "hash code" ) )
       .writeStream
+      .trigger ( Trigger.ProcessingTime ( "2 seconds" ) )
       //.trigger ( Trigger.Continuous ( "5 seconds" ) ) //use experimental CP (in Spark 2.3+).. don't work :)
       .format ( "console" )
-      .start*/
+      .start
 
     //join 3 Datasets
-    val datasets = dataset1.join ( dataset2, timestampColumn.value )
-      .join ( dataset3, timestampColumn.value )
-      /*.withColumn ( avgValueColumn.value,
-        avgOfColumns (dataset1.col ( valueColumn.value ), dataset2.col ( valueColumn.value ), dataset3.col ( valueColumn.value ) ) )
-      .withColumn ( maxLengthColumn.value,
-           maxOfColumns ( dataset1.col ( lengthColumn.value )+ dataset2.col ( lengthColumn.value ) + dataset3.col ( lengthColumn.value )  ))
-*/
-    datasets //.drop ( datasets.columns.filter ( _.equals ( valueColumn.value ) ): _* )
-      // .drop ( datasets.columns.filter ( _.equals ( lengthColumn.value ) ): _* )
+    val datasets = dataset1.join ( dataset2.toDF, idColumn.name )
+      .join ( dataset3, idColumn.name )
+      .withColumn ( avgValueColumn.name,
+      avgOfColumns (dataset1.col ( valueColumn.name ), dataset2.col ( valueColumn.name ), dataset3.col ( valueColumn.name ) ) )
+  /*.withColumn ( maxLengthColumn.name,
+       maxOfColumns ( dataset1.col ( lengthColumn.name )+ dataset2.col ( lengthColumn.name ) + dataset3.col ( lengthColumn.name )  ))*/
+    datasets//.drop ( datasets.columns.filter ( _.equals ( valueColumn.name ) ): _* )
+      //.drop ( datasets.columns.filter ( _.equals ( lengthColumn.name ) ): _* )
       //.withColumnRenamed(avgValueColumn.value, valueColumn.value)
       /* .withWatermark ( timestampColumn.value, "5 seconds")
        .groupBy (
@@ -38,7 +38,6 @@ object SparkStructuredStreaming {
       .select ( "*" )
       .writeStream
       .format ( "console" )
-      .trigger ( Trigger.ProcessingTime ( "2 seconds" ) ) //fixed trigger, CP not supported in JOIN
       .start
 
     //await any computation

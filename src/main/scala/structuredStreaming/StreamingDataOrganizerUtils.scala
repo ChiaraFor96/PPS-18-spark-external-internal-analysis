@@ -3,7 +3,7 @@ package structuredStreaming
 object StreamingDataOrganizerUtils {
 
   import org.apache.spark.sql.execution.streaming.FileStreamSource.Timestamp
-  import org.apache.spark.sql.functions.length
+  import org.apache.spark.sql.functions._
   import org.apache.spark.sql.{Dataset, SparkSession}
   import structuredManipulationUtilities._
 
@@ -14,19 +14,18 @@ object StreamingDataOrganizerUtils {
 
   import spark.implicits._
 
-  val valueColumn: DatasetColumn = DatasetColumn ( "value" )
+  val idColumn: DatasetColumn = DatasetColumn ( "id" )
   val timestampColumn: DatasetColumn = DatasetColumn ( "timestamp" )
-  val lengthColumn: DatasetColumn = DatasetColumn ( "length" )
+  val valueColumn: DatasetColumn = DatasetColumn ( "value" )
   val avgValueColumn: DatasetColumn = DatasetColumn ( "avgValue" )
   val maxLengthColumn: DatasetColumn = DatasetColumn ( "maxLength" )
 
-  def getDataset ( rowsPerSecond: Int ): Dataset[StreamRecord] = {
-    spark.readStream
-      .format ( "rate" ) //produce data for testing
-      .option ( "rowsPerSecond", rowsPerSecond )
-      .load
-      .withColumn ( lengthColumn.value, length ( valueColumn ) )
-      // or .withColumn ( lengthColumn.value, udf { s: StreamType => s.toString.length }.apply ( value.column ) )
+  def getDataset ( rowsPerSecond: Int): Dataset[StreamRecord] = {
+    //produce data for testing (can also define the schema)
+    spark.readStream.format ( "rate" ).option ( "rowsPerSecond", rowsPerSecond ).load
+      .withColumnRenamed("value", idColumn.name)
+      .withColumn ( valueColumn.name, rand * 100)
+      // or .withColumn ( valueColumn.name, udf { s: StreamType => ??? }.apply ( 'value ) )
       //define your scala function with udf (but there is a problem.. serialization)
       .as [StreamRecord] //use case class and typing of SparkSQL, there's the difference between a dataset and a dataFrame
   }
@@ -35,16 +34,15 @@ object StreamingDataOrganizerUtils {
 
     import org.apache.spark.sql.Column
 
-    type StreamValueType = Long
+    case class DatasetColumn ( name: String ) extends Column ( Symbol(name).expr )
 
-    case class DatasetColumn ( value: String ) extends Column ( Symbol(value).expr )
-
-    case class StreamRecord ( value: StreamValueType, timestamp: Timestamp, length: Int )
+    case class StreamRecord ( id: Long, timestamp: Timestamp, value: Double )
 
     object ColumnOperations {
-      def avgOfColumns ( columns: Column* ): Column = columns.reduce ( _.as [Int] + _ ) / columns.size
+      // TODO pass type
+      def avgOfColumns ( columns: Column* ): Column = columns.reduce ( _.as [Double] + _ ) / columns.size
 
-      def maxOfColumns ( columns: Column* ): Column = columns ( 0 ) // TODO map(_.as[Int]).max
+      def maxOfColumns ( columns: Column* ): Column = columns ( 0 ) // TODO map(_.as[T]).max
     }
 
   }
