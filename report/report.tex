@@ -9,6 +9,14 @@
 \usepackage{titling}
 \usepackage{graphicx}
 \usepackage{blindtext}
+\usepackage{csquotes}
+\usepackage{filecontents}
+\usepackage{titlesec}
+\newcommand{\sectionbreak}{\clearpage}
+\usepackage[
+backend=biber,
+]{biblatex}
+\addbibresource{bibliography.bib}
 
 \title{PPS18  --- Spark-external-internal-analysis}
 \author{Chiara Forresi, matr: 880050, email: {\url{chiara.forresi@studio.unibo.it}}}
@@ -22,16 +30,13 @@
 		Spark è un famoso framework Scala per big-data e cluster computing. In questo progetto si studieranno aspetti linguistici di questo framework, e la sua organizzazione interna -- l'obiettivo è porre le basi per futuri framework per computazione distribuita che si ispirino a Spark.
 	\end{abstract}
 \end{titlingpage}
-
+\nocite{*}
 \tableofcontents
 \newpage
 
 \section{Cos'è Spark?}
 Spark non è solo un motore di elaborazione di big data, può essere considerato un ``ecosistema" che offre svariate possibilità.
-%TODO
-Si tratta di una completa alternativa al `map-reduce' di Hadoop
-%TODO link
-, con molti vantaggi in termini di performance. 
+Si tratta di una completa alternativa al `map-reduce' di Hadoop \footnote{\url{https://hadoop.apache.org/docs/r1.2.1/mapred\_tutorial.html}}, con molti vantaggi in termini di performance. 
 \par Alla base dell'ecosistema di Spark vi è \textbf{SparkCore}, il quale, a sua volta, è diviso in due parti:
 \begin{itemize}
 	\item \textbf{Computer Engine}: fornisce funzioni basilari come gestione della memoria, scheduling dei task, recupero guasti, interagisce con il Cluster Manager (che non viene fornito da Spark).
@@ -52,13 +57,12 @@ Essi offrono API, DLS e algoritmi in più linguaggi e dipendono direttamente dal
 \begin{figure}[H]
 	\centering 
 	\includegraphics[width=0.8\linewidth]{img/sparkModules.png}
-	%TODO https://docs.incorta.com/
-	\caption{Archiettura di Spark}
+	\caption{Archiettura di Spark. Immagine tratta da \url{https://docs.incorta.com/}}
 	\label{fig:SparkModules}
 \end{figure}
 \par Vista la varietà di funzionalità che Spark offre, in questo progetto ci si focalizzerà maggiormente sulle funzionalità di SparkCore e sulle modalità di gestione di Streaming di dati. In entrambi i casi l'analisi verrà svolta si da un punto di vista estereriore di quello che offre il framework che quello interiore, andando a sviscerare le caretteristiche e i punti peculiari (positivi o negativi) che emergono dall'analisi. 
 \newline
-Si sottolinea che in questo progetto è stata utilizzata l'ultima versione disponibile di Spark, ovvero la \textbf{2.4.4}. Per cui per maggiori dettagli si rimanda al sito di Spark\footnote{\url{https://spark.apache.org/docs/2.4.4/quick-start.html}}.
+Si sottolinea che in questo progetto è stata utilizzata l'ultima versione disponibile di Spark, ovvero la \textbf{2.4.4}. Per cui per maggiori dettagli si rimanda al sito di Spark \cite{spark}.
 \subsection{Perchè Spark è così importante?}
 L'importanza di Spark è data soprattutto dal fatto che in un'unico framework vengono create interesioni di vario genere che fanno si che esso sia una piattaforma a tutto tondo. Questi punti sintetizzano i motivi principali dell'importanza di Spark:
 \begin{itemize}
@@ -81,7 +85,7 @@ Si può anche memorizzare questo percorso nel path di sistema e accedervi da qua
 	\item \texttt{export PATH=$PATH:$SPARK\_HOME/bin:\$SPARK\_HOME/sbin}
 \end{itemize}
 
-Seguendo questo \href{https://bigdata-madesimple.com/learning-scala-spark-basics-using-spark-shell-in-local/}{tutorial} è possibile mettere le mani in pasta in locale su un dataset e esplorare le potenzialità di Spark (in particolare Spark SQL) e, soprattutto, del DLS che esso fornisce.
+Seguendo il tutoria \cite{localexample} è possibile mettere le mani in pasta in locale su un dataset e esplorare le potenzialità di Spark (in particolare Spark SQL) e, soprattutto, del DLS che esso fornisce.
 \section{Internals}
 \subsection{Architettura}
 É possibile lanciare Spark essenzialmente in \textbf{due modalità}:
@@ -104,10 +108,10 @@ Quando eseguo Spark lo stato dei processi è visibile in una pagina web che vien
 \textit{Chi controlla il cluster? Come Spark ottiene le risorse per driver e executor?}
 Il \textit{cluster manager}, il quale non viene offerto da Apache Spark. Tra i più noti abbiamo:
 \begin{itemize}
-	\item\textbf{Apache YARN} per Hadoop;
-	\item\textbf{Apache Mesos} (general purpose);
-	\item\textbf{Kubernetes}: Google, non ancora adatto per fasi di produzione
-	\item\textbf{StandAlone} facile e veloce, non ancora adatto per fasi di produzione. %TODO check
+	\item\textbf{Apache YARN\footnote{\url{http://hadoop.apache.org/docs/stable/hadoop-yarn/hadoop-yarn-site/YARN.html}}}: il gestore delle risorse in Hadoop 2.
+	\item\textbf{Apache Mesos\footnote{\url{http://mesos.apache.org}}}: generale che può anche eseguire Hadoop MapReduce e le applicazioni di servizio.
+	\item\textbf{Kubernetes\footnote{\url{https://kubernetes.io}}}: un sistema open source per automatizzare la distribuzione, il ridimensionamento e la gestione di applicazioni containerizzate. Non ancora adatto per fasi di produzione.
+	\item\textbf{Standalone\footnote{\url{https://spark.apache.org/docs/latest/spark-standalone.html}}}: semplice, facile e veloce. Incluso in Spark, semplifica la configurazione di un cluster. Non ancora adatto per fasi di produzione. 
 \end{itemize}
 
 
@@ -177,8 +181,7 @@ La Figura \ref{fig:RDDs} mostra l'intero meccanismo di RDDs e trasformazioni e a
 \begin{figure}
 	\centering 
 	\includegraphics[width=1\linewidth]{img/rdds.png}
-	\caption{RDDs e meccanismo di trasformations e actions.}
-	%TODO Immagine tratta da \citeweb{http://sparkforbeginners.blogspot.com}
+	\caption{RDDs e meccanismo di trasformations e actions.https://docs.incorta.com/ \url{http://sparkforbeginners.blogspot.com}}
 	\label{fig:RDDs}
 \end{figure}
 \par Per passare funzioni a Spark nel sito viene mostrato come sfruttare map su un RDDs applicandoci una propria funzione che prende in input un dato dello stresso tipo di quello contenuto nel RDDs. Secondo me questo aspetto da un lato obbliga il programmatore ad appoggiarsi alle API fornite dal framework e quindi ottimizzate da Spark, dall'altro pone dei limiti nel come il programmatore vuole approcciarsi ai dati. Limite che viene abbastanza ridotto dalla potenza e dalla facilità di comprensione del DLS che Spark mette a disposizione.
@@ -209,8 +212,7 @@ Ci sono varie operazioni a supporto di questo concetto, anche algoritmi e builde
 \begin{figure}[H]
 	\centering 
 	\includegraphics[width=0.8\linewidth]{img/graph_analytics_pipeline.png}
-	\caption{Funzionamento di GraphX.}
-	%TODO Immagine tratta da \citeweb{http://https://spark.apache.org/}
+	\caption{Funzionamento di GraphX. Immagine tratta da \cite{spark}.}
 	\label{fig:GraphX}
 \end{figure}
 Quindi userei questa estensione quando nella natura dei dati ci sono legami che vengono meglio rappresentati da un grafo,
@@ -230,11 +232,11 @@ SparkR è un pacchetto R che fornisce un frontend leggero per utilizzare Apache 
 \begin{figure}[H]
 	\centering 
 	\includegraphics[width=0.8\linewidth]{img/sparkStructuredStreaming.png}
-	\caption{Come Spark Structured Streaming mantiene i dati.}
-	%TODO Immagine tratta da \citeweb{https://link.springer.com/chapter/10.1007/978-1-4842-4961-1\_3}
+	\caption{Come Spark Structured Streaming mantiene i dati. Immagine tratta da \cite{structuredStreaming}}
 	\label{fig:StructuredStreaming}
 \end{figure}
-
+\newpage
+\printbibliography
 \end{document}
     
     
