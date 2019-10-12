@@ -52,6 +52,7 @@ Essi offrono API, DLS e algoritmi in più linguaggi e dipendono direttamente dal
 \begin{figure}[H]
 	\centering 
 	\includegraphics[width=0.8\linewidth]{img/sparkModules.png}
+	%TODO https://docs.incorta.com/
 	\caption{Archiettura di Spark}
 	\label{fig:SparkModules}
 \end{figure}
@@ -108,9 +109,15 @@ Il \textit{cluster manager}, il quale non viene offerto da Apache Spark. Tra i p
 	\item\textbf{Kubernetes}: Google, non ancora adatto per fasi di produzione
 	\item\textbf{StandAlone} facile e veloce, non ancora adatto per fasi di produzione. %TODO check
 \end{itemize}
+
+
 \subsection{RDDs  e tasks}
-%TODO cosa sono RDDs
+\subsubsection{Resilient Distributed Datasets (RDDs)}
+Spark ruota attorno al concetto di RDD, ovvero una collection fault-tollerant che può essere processata in parallelo. Ci sono due modi per creare un RDD: parellelizzando una collezione esistente nel tuo driver program o facendo riferimento a un archivio di dati esterno (come filesystem condivisi, HDFS, Hbase o qualsiasi input che ha dati in formato Hadoop).
+
+\subsubsection{RDDs e conseguenze}
 Poichè Dataset e DataFrame (API di dati strutturati) ereditano da RDDs (non strutturati), capendo questi ultimi possiamo capire come effettivamente viene distribuito il lavoro tra gli executors.
+
 Quando viene letto un file è possibile specificare il numero di \textbf{partizioni di un RDD} che (guarda caso) coincide con il corrispondente \textbf{numero di task}.
 Ovviamente, numero executors e di task sono effettivamente correlati e quindi bisogna specificare il numero di conseguenza.
 
@@ -156,11 +163,77 @@ Bisogna fissare questo numero nell'intervallo compreso tra:
 
 %TODO (da vedere https://databricks.com/session/a-deeper-understanding-of-spark-internals da min. 22)
 
+\section{Moduli di Spark}
+\subsection{Iniziare a lavorarare con Spark e gli RDDs}
+Per iniziare a usare Spark bisogna comprendere due concetti principali che sono lo \textit{SparkContext} e la \textit{SparkSession}. %TODO
+Per ciascuna JVM ci può essere al più una \textit{SparkContext}.
 
-\section{Moduli per lavorare con stream di dati}
-\subsection{Spark Streaming}
-\subsection{Spark Structured Streaming}
+\par Ci sono due operazioni fondamentali che vengono fatte sui dati, che rispecchiano essenzialemente il principio \textit{map-reduce}:
+\begin{itemize}
+	\item \textbf{transformations}: ovvero operazioni di map \textit{map}, sono lazy l'eventuale azione su di essa applicherà la trasformazione. Eventualmente è possibile rendere questi cambiamenti persistenti (con l'opportuno persist), altrimenti non lo sono.
+	\item \textbf{actions}: ovvero operazioni di map \textit{reduce}.
+\end{itemize}
+La Figura \ref{fig:RDDs} mostra l'intero meccanismo di RDDs e trasformazioni e azioni.
+\begin{figure}
+	\centering 
+	\includegraphics[width=1\linewidth]{img/rdds.png}
+	\caption{RDDs e meccanismo di trasformations e actions.}
+	%TODO Immagine tratta da \citeweb{http://sparkforbeginners.blogspot.com}
+	\label{fig:RDDs}
+\end{figure}
+\par Per passare funzioni a Spark nel sito viene mostrato come sfruttare map su un RDDs applicandoci una propria funzione che prende in input un dato dello stresso tipo di quello contenuto nel RDDs. Secondo me questo aspetto da un lato obbliga il programmatore ad appoggiarsi alle API fornite dal framework e quindi ottimizzate da Spark, dall'altro pone dei limiti nel come il programmatore vuole approcciarsi ai dati. Limite che viene abbastanza ridotto dalla potenza e dalla facilità di comprensione del DLS che Spark mette a disposizione.
+\par Per quanto riguarda il \textbf{caching}, oltre a persistent, esistono modalità per specificare a quale memoria far riferimento e funziona anche su dati presenti in molti nodi.
+\par Se andassi ad applicare \texttt{collect()} su una grande quantità di dati potrei incorrere in un \textit{``out of memory"}, per cui bisogna applicare concetti simili a quelli visti durante il corso di PPS. Ad esempio anzichè fare una stampa di tutti i dati, si vanno recuperare i primi N record con una \texttt{take(N)}.
+\subsection{Machine Learning Library (MLlib)}
+Questo modulo consiste in:
+\begin{itemize}
+	\item \textit{Algoritmi di Machine Learning}: come classificazione, regressione, clustering e filtering collaborativo.
+	\item \textit{Featurization}: estrazione delle feature, transformazione, riduzione della dimensionalità e selezione.
+	\item \textit{Pipelines}: tool per costruire, valutare e fare tuning di pipeline di ML.
+	\item \textit{Persistenza}: salvare e eseguire algoritmi, modelli e pipeline.
+	\item \textit{Utility}: algebra lineare, statistica, gestione dati, etc.
+\end{itemize}
+\subsection{Spark SQL}
+Supporto a dati strutturati, fornisce maggiori ottimizzazioni rispetto a RDD. L'interazione con i dati è possibile in vari modi, tra cui SQL e Dataset API.
+Nella computazione viene usato un unico engine di esecuzione, il programmatore può esprire le cose nel modo che ritiene più naturale. Uso di Hive, JDBC, etc. 
+Non credo questo sia interessante sul lato PPS. %TODO
+\subsubsection{Dataset API}
+Operazioni con cui interrogare il Dataset. 
+Un Dataset si può creare anche `on the fly" da un file di testo o appartenere a determinati formati (es. Hadoop HDFS) o trasformando altri Dataset.
+Nelle interrogazioni che lo richiedono vengono passate funzioni, per cui possono entrare in gioco aspetti di PPS. Questa parte verrà meglio sviscerata in seguito. %TODOs
+\subsection{GraphX Programming}
+Componente Spark per Grafi e calcolo graph-parallel.
 
+Ad alto livello viene estratto il concetto di RDD introducendo l'estensione Graph, in Figura \ref{fig:GraphX} viene mostrata la costruzione del grafo a partire dai dati grezzi.
+Ci sono varie operazioni a supporto di questo concetto, anche algoritmi e builder per l'analisi.
+\begin{figure}[H]
+	\centering 
+	\includegraphics[width=0.8\linewidth]{img/graph_analytics_pipeline.png}
+	\caption{Funzionamento di GraphX.}
+	%TODO Immagine tratta da \citeweb{http://https://spark.apache.org/}
+	\label{fig:GraphX}
+\end{figure}
+Quindi userei questa estensione quando nella natura dei dati ci sono legami che vengono meglio rappresentati da un grafo,
+prima di dare in pasto i dati a GraphX potrebbero servire minime operazioni per renderli "compatibili" con la visione a grafo.
+Nella costruzione vengono richiesti:
+\begin{itemize}
+	\item RDD dei vertici;
+	\item RDD degli edge;
+	\item un vertice di default (pozzo).
+\end{itemize}
+\subsection{SparkR (R on Spark)}
+SparkR è un pacchetto R che fornisce un frontend leggero per utilizzare Apache Spark da R. In Spark 2.4.4, SparkR fornisce un'implementazione di data frame distribuiti che supporta operazioni come selezione, filtro, aggregazione ecc. (simile a data frame R, dplyr) ma su set di dati di grandi dimensioni. SparkR supporta inoltre l'apprendimento automatico distribuito tramite MLlib.
+
+\subsection{Moduli per lavorare con stream di dati}
+\subsubsection{Spark Streaming}
+\subsubsection{Spark Structured Streaming}
+\begin{figure}[H]
+	\centering 
+	\includegraphics[width=0.8\linewidth]{img/sparkStructuredStreaming.png}
+	\caption{Come Spark Structured Streaming mantiene i dati.}
+	%TODO Immagine tratta da \citeweb{https://link.springer.com/chapter/10.1007/978-1-4842-4961-1\_3}
+	\label{fig:StructuredStreaming}
+\end{figure}
 
 \end{document}
     
