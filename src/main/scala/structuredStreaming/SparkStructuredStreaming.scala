@@ -13,6 +13,8 @@ object SparkStructuredStreaming {
     val datasets: Seq[Dataset[StreamRecord]] = Seq ( getRateDataset ( 10 ),
       getRateDataset ( 20 ),
       getRateDataset ( 30 ) )
+    //docker inspect --format "{{ .NetworkSettings.IPAddress }}" $(docker ps -q)
+    //getSocketDataFrame("172.17.0.3", 9999).select("*").writeStream.format("console").start
 
     //udf function
     datasets.head.select ( udf { s: Long => s.hashCode }.apply ( idColumn ).as ( "hash code" ) )
