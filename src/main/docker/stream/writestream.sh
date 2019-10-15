@@ -8,6 +8,7 @@ $HADOOP_HOME/sbin/start-yarn.sh
 $HADOOP_HOME/sbin/mr-jobhistory-daemon.sh start historyserver
 
 i=0
+echo "date, value" >> data.csv
 while :
 do
   ((i+=1))
