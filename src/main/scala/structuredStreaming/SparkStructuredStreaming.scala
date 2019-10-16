@@ -16,25 +16,25 @@ object SparkStructuredStreaming {
     import org.apache.spark.sql.functions._
     import org.apache.spark.sql.streaming.Trigger
     import org.apache.spark.sql.types.{StructType, DataTypes}
+    import spark.implicits._
 
     val datasets: Seq[Dataset[StreamRecord]] = Seq ( getRateDataset ( 10 ),
       getRateDataset ( 20 ),
       getRateDataset ( 30 ) );
-    //docker inspect --format "{{ .NetworkSettings.IPAddress }}" $(docker ps -q)
-    //docker run -ti --hostname nethost -p 9999:9999 netcat (nethost in etc/hosts)
-    val df = spark.readStream
-      .schema(new StructType().add("date", DataTypes.StringType).add("value", DataTypes.StringType))
-      .options ( Map ( "header" -> "true", "inferSchema" -> "true" ) )
+
+    val externalSource = spark.readStream
+      .schema(new StructType().add("id",  DataTypes.StringType)
+        .add("timestamp", DataTypes.StringType)
+        .add("value",  DataTypes.StringType))
+      .option ( "header", "true" )
       .format("csv")
       .load("hdfs://stream:9999/*.csv")
-    //TODO check what's the problem of data.csv change
+      .withColumn(valueColumn.name, valueColumn.cast("double"))
+      .withColumn(idColumn.name, idColumn.cast("int"))
+      .withColumn(timestampColumn.name, timestampColumn.cast("timestamp"))
+      .as[StreamRecord]
 
-      df.select("*")
-        .writeStream
-        .trigger ( Trigger.ProcessingTime ( "1 seconds" ) )
-        .format("console")
-        .start
-
+    externalSource.select("*").writeStream.format ( "console" ).start
     //udf function
     datasets.head.select ( udf { s: Long => s.hashCode }.apply ( idColumn ).as ( "hash code" ) )
       .writeStream
@@ -43,16 +43,18 @@ object SparkStructuredStreaming {
       .format ( "console" )
       .start
 
-    val computedDatasets = datasets.map ( _.toDF ).reduce ( ( a, b ) => a.join ( b, idColumn.name ) )
+    var computedDatasets = datasets.map ( _.toDF ).reduce ( ( a, b ) => a.join ( b, idColumn.name ) )
       .withColumn ( avgValueColumn.name, avgOfColumns ( datasets.map ( _.col ( valueColumn.name ) ) ) )
       .withColumn ( avgTimestampColumn.name,
         to_timestamp ( avgOfColumns ( datasets.map ( ds => unix_timestamp ( ds.col ( timestampColumn.name ) ) ) ) ) )
 
-    computedDatasets.drop ( computedDatasets.columns.filter ( _.equals ( valueColumn.name ) ): _* )
+    computedDatasets = computedDatasets.drop ( computedDatasets.columns.filter ( _.equals ( valueColumn.name ) ): _* )
       .drop ( computedDatasets.columns.filter ( _.equals ( timestampColumn.name ) ): _* )
+
+    computedDatasets.join(externalSource, idColumn.name)
       .withWatermark ( avgTimestampColumn.name, "5 seconds" )
       .groupBy ( window ( avgTimestampColumn, "10 seconds", "5 seconds" ) )
-      .mean ( avgValueColumn.name )
+      .agg ( mean(avgValueColumn.name).as("InternalAVG"), max( valueColumn.name ).as("ExternalMAX") )
       .writeStream
       .format ( "console" )
       .start

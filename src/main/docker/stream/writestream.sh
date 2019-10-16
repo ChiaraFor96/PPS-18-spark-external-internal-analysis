@@ -8,13 +8,15 @@ $HADOOP_HOME/sbin/start-yarn.sh
 $HADOOP_HOME/sbin/mr-jobhistory-daemon.sh start historyserver
 
 i=0
+id=0
 while :
 do
   ((i+=1))
-  echo "date, value" >> data${i}.csv
+  echo "id,timestamp,value" >> data${i}.csv
   for X in $(seq 5)
   do
-      echo "$(date), $X" >> data${i}.csv
+      echo "$id,$(date +%T),$X" >> data${i}.csv
+        ((id+=1))
       sleep 1
   done
   $HADOOP_HOME/bin/hdfs dfs -copyFromLocal -f data${i}.csv /
