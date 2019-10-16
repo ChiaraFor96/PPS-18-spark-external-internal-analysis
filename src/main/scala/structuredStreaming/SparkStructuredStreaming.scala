@@ -51,10 +51,13 @@ object SparkStructuredStreaming {
     computedDatasets = computedDatasets.drop ( computedDatasets.columns.filter ( _.equals ( valueColumn.name ) ): _* )
       .drop ( computedDatasets.columns.filter ( _.equals ( timestampColumn.name ) ): _* )
 
+
+   // computedDatasets.join(externalSource, idColumn.name).select("*").writeStream.format("console").start
+
     computedDatasets.join(externalSource, idColumn.name)
       .withWatermark ( avgTimestampColumn.name, "5 seconds" )
       .groupBy ( window ( avgTimestampColumn, "10 seconds", "5 seconds" ) )
-      .agg ( mean(avgValueColumn.name).as("InternalAVG"), max( valueColumn.name ).as("ExternalMAX") )
+      .agg ( mean(avgValueColumn.name).as("InternalAVG"), mean( valueColumn.name ).as("ExternalAVG") )
       .writeStream
       .format ( "console" )
       .start
