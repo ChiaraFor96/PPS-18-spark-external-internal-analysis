@@ -17,7 +17,7 @@ do
   do
       echo "$id,$(date +%T),$X" >> data${i}.csv
         ((id+=1))
-      sleep 1
+      sleep 10
   done
   $HADOOP_HOME/bin/hdfs dfs -copyFromLocal -f data${i}.csv /
   sleep 10
