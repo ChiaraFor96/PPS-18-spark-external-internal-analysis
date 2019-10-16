@@ -33,11 +33,37 @@ object StreamingDataOrganizerUtils {
       .as [StreamRecord] //use case class and typing of SparkSQL, there's the difference between a Dataset and a dataFrame
   }
 
-  def getSocketDataFrame (host : String, port : Int): DataFrame = {
+  def getSocketDataFrame ( host: String, port: Int ): DataFrame = {
     spark.readStream
       .format ( "socket" )
       .options ( Map ( "host" -> host, "port" -> port.toString ) )
       .load
+  }
+
+
+  object CalendarInterval {
+    object DurationType extends Enumeration {
+      type DurationType = Value
+      val Seconds, Minutes, Hours = Value
+    }
+
+    import DurationType._
+
+    trait Duration {
+      val value: Int
+      val durationType: DurationType
+
+      override def toString: String = s"$value ${durationType.toString.toLowerCase}"
+    }
+
+    case class Seconds ( override val value: Int ) extends Duration {
+      override val durationType: DurationType = DurationType.Seconds
+    }
+
+    case class Minutes ( override val value: Int ) extends Duration {
+      override val durationType: DurationType = DurationType.Minutes
+    }
+
   }
 
   object structuredManipulationUtilities {

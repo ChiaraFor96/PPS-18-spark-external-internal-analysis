@@ -6,21 +6,21 @@ launch notes:
 */
 package structuredStreaming
 
-import structuredStreaming.StreamingDataOrganizerUtils.structuredManipulationUtilities.StreamRecord
-
 object SparkStructuredStreaming {
   def main ( args: Array[String] ): Unit = {
     import StreamingDataOrganizerUtils._
     import StreamingDataOrganizerUtils.structuredManipulationUtilities.ColumnOperations._
+    import structuredStreaming.StreamingDataOrganizerUtils.structuredManipulationUtilities.StreamRecord
     import org.apache.spark.sql.Dataset
     import org.apache.spark.sql.functions._
     import org.apache.spark.sql.streaming.Trigger
     import org.apache.spark.sql.types.{StructType, DataTypes}
+    import structuredStreaming.StreamingDataOrganizerUtils.CalendarInterval.Seconds
     import spark.implicits._
 
     val datasets: Seq[Dataset[StreamRecord]] = Seq ( getRateDataset ( 10 ),
       getRateDataset ( 20 ),
-      getRateDataset ( 30 ) );
+      getRateDataset ( 30 ) )
 
     val externalSource = spark.readStream
       .schema(new StructType().add("id",  DataTypes.StringType)
@@ -38,8 +38,8 @@ object SparkStructuredStreaming {
     //udf function
     datasets.head.select ( udf { s: Long => s.hashCode }.apply ( idColumn ).as ( "hash code" ) )
       .writeStream
-      .trigger ( Trigger.ProcessingTime ( "2 seconds" ) )
-      //.trigger ( Trigger.Continuous ( "5 seconds" ) ) //use experimental CP (in Spark 2.3+).. don't work :)
+      .trigger ( Trigger.ProcessingTime (  Seconds(2).toString ) )
+      //.trigger ( Trigger.Continuous ( Seconds(5).toString ) ) //use experimental CP (in Spark 2.3+).. don't work :)
       .format ( "console" )
       .start
 
@@ -55,15 +55,14 @@ object SparkStructuredStreaming {
    // computedDatasets.join(externalSource, idColumn.name).select("*").writeStream.format("console").start
 
     computedDatasets.join(externalSource, idColumn.name)
-      .withWatermark ( avgTimestampColumn.name, "5 seconds" )
-      .groupBy ( window ( avgTimestampColumn, "10 seconds", "5 seconds" ) )
+      .withWatermark ( avgTimestampColumn.name, Seconds(5).toString )
+      .groupBy ( window ( avgTimestampColumn, Seconds(10).toString, Seconds(5).toString ) )
       .agg ( mean(avgValueColumn.name).as("InternalAVG"), mean( valueColumn.name ).as("ExternalAVG") )
+
       .writeStream
       .format ( "console" )
       .start
 
     spark.streams.awaitAnyTermination
   }
-
-  //TODO refactor seconds!!!
 }
