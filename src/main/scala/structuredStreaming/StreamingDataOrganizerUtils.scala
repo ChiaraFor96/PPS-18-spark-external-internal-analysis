@@ -11,6 +11,7 @@ object StreamingDataOrganizerUtils {
 
   val spark: SparkSession = SparkSession.builder.appName ( "Structured Streaming" )
     .master ( "local[*]" )
+    .config ( "spark.hadoop.dfs.client.use.datanode.hostname", "true" )
     .getOrCreate
   spark.sparkContext.setLogLevel ( "ERROR" )
 
