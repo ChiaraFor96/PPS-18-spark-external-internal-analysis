@@ -136,9 +136,15 @@ Nell'esempio sottostante viene mostrato il suo utilizzo, in particolare è possi
 É possibile lanciare Spark essenzialmente in \textbf{due modalità}:
 \begin{enumerate}
 	\item \textbf{Interattiva (spark-shell)}: si tratta di un potente strumento per analizzare in modo interattivo e controllare lo stato delle attività nel Cluster. Non è raccomandabile usarlo in scenari reali.
-	\item \textbf{Submit di un job}: da command line, non supporta altri casi come l'avvio di spark da altre applicazioni anche se lo snippet di codice non è un jar (in caso di produzione).
+	\item \textbf{Submit di un job}: da command line, non supporta altri casi come l'avvio di Spark da altre applicazioni anche se lo snippet di codice non è un jar (in caso di produzione).
 \end{enumerate}
 Queste modalità ci aprono al concetto di \textit{master-worker} (PCD) che nel ``dialetto di Spark" è noto come \textbf{``driver-executor"}.
+\begin{figure}
+	\centering 
+,	\includegraphics[width=0.8\linewidth]{img/cluster-overview.png}
+	\caption{Driver-executor in relazione a Cluster Manager. Immagine tratta da \cite{spark}}
+	\label{fig:driverexecutor}
+\end{figure}
 Essenzialmente posso usare Spark con o senza un vero cluster (questo viene impostato nella \textit{SparkConf}):
 \begin{itemize}
 	\item \textbf{local mode}: uso in fase esplorativa per iniziare ad usare spark senza un effettivo cluster.
@@ -151,7 +157,7 @@ Essenzialmente posso usare Spark con o senza un vero cluster (questo viene impos
 Quando eseguo Spark lo stato dei processi è visibile in una pagina web che viene linkata nel esecuzione del progesso (la \textbf{Spark UI}), in essa è possibile visualizzare come viene effettivamente distribuito il lavoro, lo stato del lavoro e i DAG \ref{sec:DAG}. 
 
 \par Nel caso in cui si utilizzasse un cluster c'è da porsi una domanda: \textit{``Chi controlla il cluster? Come Spark ottiene le risorse per driver e executor?"}
-\newline La risposta è: il \textit{cluster manager} (Figura \ref{fig:SparkModules}), il quale non viene offerto da Apache Spark. Tra i più noti abbiamo:
+\newline La risposta è, come mostrato in Figura \ref{fig:driverexecutor}: il \textit{cluster manager} (Figura \ref{fig:SparkModules}), il quale non viene offerto da Apache Spark. Tra i più noti abbiamo:
 \begin{itemize}
 	\item\textbf{Apache YARN\footnote{\url{http://hadoop.apache.org/docs/stable/hadoop-yarn/hadoop-yarn-site/YARN.html}}}: il gestore delle risorse in Hadoop 2.
 	\item\textbf{Apache Mesos\footnote{\url{http://mesos.apache.org}}}: generale che può anche eseguire Hadoop MapReduce e le applicazioni di servizio.
@@ -159,10 +165,9 @@ Quando eseguo Spark lo stato dei processi è visibile in una pagina web che vien
 	\item\textbf{Standalone\footnote{\url{https://spark.apache.org/docs/latest/spark-standalone.html}}}: semplice, facile e veloce. Incluso in Spark, semplifica la configurazione di un cluster. Non ancora adatto per fasi di produzione. 
 \end{itemize}
 
-%TODO DA QUI
 \subsection{RDDs  e tasks}
 \subsubsection{Resilient Distributed Datasets (RDDs)}\label{sec:RDD}
-Spark ruota attorno al concetto di RDD, ovvero una collection fault-tollerant che può essere processata in parallelo. Ci sono due modi per creare un RDD: parellelizzando una collezione esistente nel tuo driver program o facendo riferimento a un archivio di dati esterno (come filesystem condivisi, HDFS, Hbase o qualsiasi input che ha dati in formato Hadoop).
+Spark ruota attorno al concetto di RDD, ovvero una collection fault-tollerant che può essere processata in parallelo. Ci sono due modi per creare un RDD: parellelizzando una collezione esistente nel driver program o facendo riferimento ad un archivio di dati esterno (come filesystem condivisi, HDFS, Hbase o qualsiasi input che ha dati in formato Hadoop).
 
 \subsubsection{RDDs e conseguenze}
 Poichè Dataset e DataFrame (API di dati strutturati) ereditano da RDDs (non strutturati), capendo questi ultimi possiamo capire come effettivamente viene distribuito il lavoro tra gli executors.
@@ -171,30 +176,54 @@ Quando viene letto un file è possibile specificare il numero di \textbf{partizi
 Ovviamente, numero executors e di task sono effettivamente correlati e quindi bisogna specificare il numero di conseguenza.
 
 Si lavora in \textbf{stage}, uno stage rappresenta un periodo (una o più funzione chiamata sui dati) in cui non è necessario uno shuffle, ovvero non è necessario spostare i dati tra le partizioni. Se i dati devono muoversi (es. reduceByKey) bisogna ripartizionare i dati (\textit{shuffle \& sort}).
-Con `collect` si ritorna dagli executor al driver.
+Con \textit{collect} si ritorna dagli executor al driver.
 
 %TODO Nota interessante, in Scala, DataFrame è così definito ``type DataFrame = Dataset[Row]" \footnote{\url{https://spark.apache.org/docs/2.4.4/api/scala/index.html}}, ciò significa che su un DataFrame posso chiamare tutti i metodi del Dataset.
 
-\subsection{Execution Model} %TODO
+\subsubsection{DAG (Directed Acyclic Graph) }\label{sec:DAG}
+Un \textbf{DAG} è un grafo diretto senza cicli, dove i nodi rappresentano gli RDD e gli archi le operazioni da applicare su essi. Un esempio di DAG è mostrato in Figura \ref{fig:DAG}.
+A fronte della chiamata di un'azione \ref{sec:actions}, il DAG creato viene inviato al DAG Scheduler che suddivide ulteriormente il grafo negli stage dell'attività.
+\par Un DAG consente all'utente di comprendere effettivamente cosa sta accadendo, anche in merito agli shuffle e gli stage.
+\begin{figure}[H]
+	\centering 
+	\includegraphics[width=0.6\linewidth]{img/DAG.png}
+	\caption{Esempio DAG di Spark. Immagine tratta da \url{https://databricks.com}}
+	\label{fig:DAG}
+\end{figure}
 
+\subsection{Modello di esecuzione} 
+Il modello di esecuzione di Spark, visibile - durante l'esecuzione - nel dettaglio nella Spark UI (http://:4040), può essere diviso nelle seguenti macro-fasi (come mostrato in Figura \ref{fig:model}):
+\begin{enumerate}
+	\item \textbf{creazione del piano logico}
+	\item \textbf{traduzione del piano logico in un piano fisico}
+	\item \textbf{esecuzione delle attività sul cluster}
+\end{enumerate}
+Nel caso in cui si volesse vedere graficamente, ad esecuzione terminata, il dettaglio grafico è possibile visitare la \textit{Spark history} (http://:18080).
+\begin{figure}[H]
+	\centering 
+	\includegraphics[width=1\linewidth]{img/model.png}
+	\caption{Job scheduling in Spark. Immagine tratta da \url{http://datastrophic.io}}
+	\label{fig:model}
+\end{figure}
+Nel dettaglio le fasi sono le seguenti: %TODO deve essere messo meglio!
 \begin{itemize}
-	\item Crea DAG di RDDs per rappresentare la computazione;
-	\item Crea piano di esecuzione logico del DAG;
-	\item pipeline il più possibile %TODO
-	\item divide in \textbf{stages}
-	\item Schedula e esegue i tasks:
-	\item divide ogni stage in task
-	\item task = dati + computazione
-	\item esegue tutti i task di uno stage prima di andare avanti
+	\item crea DAG e RDDs per rappresentare la computazione;
+	\item crea il piano di esecuzione logico del DAG;
+	\item fa pipeline il più possibile;
+	\item divide in \textbf{stages};
+	\item schedula e esegue i tasks;
+	\item divide ogni stage in task;
+	\item task = dati + computazione;
+	\item esegue tutti i task di uno stage prima di andare avanti.
 \end{itemize}
 
 \subsection{Di più sullo shuffle}
-Note importanti sullo shuffle sono:
+Note importanti e aggiuntive sullo shuffle sono:
 \begin{enumerate}
 	\item è pull based e non push based;
-	\item scrive file intermedi nei dischi
+	\item scrive file intermedi nei dischi.
 \end{enumerate}
-Bisognate tenere d'occhio il \textbf{numero di partizioni} perchè possono fondamentalmente esserci due situazioni.
+Bisogna tenere d'occhio il \textbf{numero di partizioni} perchè possono fondamentalmente esserci due situazioni:
 \begin{enumerate}
 	\item numero troppo \textbf{basso}:
 	\begin{itemize}
@@ -212,21 +241,11 @@ Bisogna fissare questo numero nell'intervallo compreso tra:
 \end{itemize}
 
 %TODO (da vedere https://databricks.com/session/a-deeper-understanding-of-spark-internals da min. 22)
-\subsubsection{DAG (Directed Acyclic Graph) }\label{sec:DAG}
-Un \textbf{DAG} è un grafo diretto senza cicli, dove i nodi rappresentano gli RDD e gli archi le operazioni da applicare su essi. Un esempio di DAG è mostrato in Figura \ref{fig:DAG}.
-A fronte della chiamata di un'azione \ref{sec:actions}, il DAG creato viene inviato al DAG Scheduler che suddivide ulteriormente il grafo negli stage dell'attività.
-\par Un DAG consente all'utente di comprendere effettivamente cosa sta accadendo, anche in merito agli shuffle e gli stage.
-\begin{figure}
-	\centering 
-	\includegraphics[width=0.6\linewidth]{img/DAG.png}
-	\caption{Esempio DAG di Spark. Immagine tratta da \url{https://databricks.com}}
-	\label{fig:DAG}
-\end{figure}
 \section{Moduli di Spark}
 \subsection{Iniziare a lavorarare con Spark e gli RDDs}
 Ci sono due operazioni fondamentali che vengono fatte sui dati, che rispecchiano essenzialemente il principio \textit{map-reduce}:
 \begin{itemize}
-	\item \textbf{transformations}: ovvero operazioni di \textit{map}, sono lazy l'eventuale azione su di essa applicherà la trasformazione. Eventualmente è possibile rendere questi cambiamenti persistenti (con l'opportuno persist), altrimenti non lo sono.
+	\item \textbf{transformations}: ovvero operazioni di \textit{map}, sono lazy: l'eventuale azione su di essa applicherà la trasformazione. Eventualmente è possibile rendere questi cambiamenti persistenti (con l'opportuno persist), altrimenti non lo sono.
 	\item \textbf{actions}\label{sec:actions}: ovvero operazioni di \textit{reduce}.
 \end{itemize}
 La Figura \ref{fig:RDDs} mostra l'intero meccanismo di RDDs e trasformazioni e azioni.
@@ -236,14 +255,13 @@ La Figura \ref{fig:RDDs} mostra l'intero meccanismo di RDDs e trasformazioni e a
 	\caption{RDDs e meccanismo di trasformations e actions. Immagine tratta da \url{http://sparkforbeginners.blogspot.com}}
 	\label{fig:RDDs}
 \end{figure}
-\par Per passare funzioni a Spark nel sito viene mostrato come sfruttare map su un RDDs applicandoci una propria funzione che prende in input un dato dello stresso tipo di quello contenuto nel RDDs. Secondo me questo aspetto da un lato obbliga il programmatore ad appoggiarsi alle API fornite dal framework e quindi ottimizzate da Spark, dall'altro pone dei limiti nel come il programmatore vuole approcciarsi ai dati. Limite che viene abbastanza ridotto dalla potenza e dalla facilità di comprensione del DLS che Spark mette a disposizione.
+\par Per passare funzioni a Spark nel sito viene mostrato come sfruttare map su un RDDs applicandoci una propria funzione che prende in input un dato dello stresso tipo di quello contenuto nel RDDs. Secondo me questo aspetto da un lato obbliga il programmatore ad appoggiarsi alle API fornite dal framework e quindi ottimizzate da Spark, dall'altro pone dei limiti nel come il programmatore vuole approcciarsi ai dati. Limite che viene abbastanza ridotto dalla potenza e dalla facilità di comprensione del DLS che Spark mette a disposizione, soprattutto in SparkSQL.
 \par Per quanto riguarda il \textbf{caching}, oltre a persistent, esistono modalità per specificare a quale memoria far riferimento e funziona anche su dati presenti in molti nodi.
 \par Se andassi ad applicare \texttt{collect()} su una grande quantità di dati potrei incorrere in un \textit{``out of memory"}, per cui bisogna applicare concetti simili a quelli visti durante il corso di PPS. Ad esempio anzichè fare una stampa di tutti i dati, si vanno recuperare i primi N record con una \texttt{take(N)}.
 \par Una delle cose più difficili di Spark è comprendere l'ambito e il ciclo di vita di variabili e metodi quando si esegue il codice in un cluster. Le operazioni RDD che modificano le variabili al di fuori del loro ambito di applicazione possono essere una fonte frequente di confusione. C'è sostanzialmente un problema di concorrenza e della \textit{closure} rispetto all'ambito di lavoro di un task che Spark risolve con l'inserimento di due concetti:
-%TODO meglio??
 \begin{enumerate}
 	\item \textbf{broadcasts}\label{sec:broadcasts}:  consentono al programmatore di mantenere una variabile di sola lettura memorizzata nella cache su ogni macchina anziché inviarne una copia con le attività. Possono essere utilizzati, ad esempio, per fornire ad ogni nodo una copia di un set di dati di input di grandi dimensioni in modo efficiente. Spark tenta anche di distribuire variabili di trasmissione utilizzando algoritmi di trasmissione efficienti per ridurre i costi di comunicazione.
-	\item \textbf{accumulators}\label{sec:aoccumulators}: sono variabili che vengono “aggiunte” solo attraverso un'operazione associativa e commutativa e possono quindi essere supportate in modo efficiente in parallelo. Possono essere utilizzati per implementare contatori (come in MapReduce) o somme. Spark supporta nativamente accumulatori di tipi numerici e i programmatori possono aggiungere il supporto per nuovi tipi. Vale sempre il concetto lazy (vedi trasformazioni).
+	\item \textbf{accumulators}\label{sec:aoccumulators}: sono variabili che vengono “aggiunte” solo attraverso un'operazione associativa e commutativa e possono, quindi, essere supportate in modo efficiente in parallelo. Possono essere utilizzati per implementare contatori (come in MapReduce) o somme. Spark supporta nativamente accumulatori di tipi numerici e i programmatori possono aggiungere il supporto per nuovi tipi. Vale sempre il concetto lazy (vedi trasformazioni).
 \end{enumerate}
 \subsection{Machine Learning Library (MLlib)}
 Questo modulo consiste in:
@@ -254,8 +272,9 @@ Questo modulo consiste in:
 	\item \textit{Persistenza}: salvare e eseguire algoritmi, modelli e pipeline.
 	\item \textit{Utility}: algebra lineare, statistica, gestione dati, etc.
 \end{itemize}
+%TODO da qui
 \subsection{Spark SQL}
-Supporto a dati strutturati, fornisce maggiori ottimizzazioni rispetto a RDD. L'interazione con i dati è possibile in vari modi, tra cui SQL e Dataset API.
+Modulo di supporto a dati strutturati, fornisce maggiori ottimizzazioni rispetto a RDD. L'interazione con i dati è possibile in vari modi, tra cui SQL e Dataset API.
 Nella computazione viene usato un unico engine di esecuzione, il programmatore può esprire le cose nel modo che ritiene più naturale. Uso di Hive, JDBC, etc. 
 Non credo questo sia interessante sul lato PPS. %TODO
 \subsubsection{Dataset API}
