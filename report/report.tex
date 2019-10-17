@@ -13,7 +13,7 @@
 \usepackage{filecontents}
 \usepackage{titlesec}
 \usepackage{listings}
-\lstloadlanguages{scala}
+\lstloadlanguages{Scala}
 \newcommand{\sectionbreak}{\clearpage}
 \usepackage[
 backend=biber,
@@ -101,37 +101,36 @@ Seguendo il tutorial \cite{localexample} è possibile mettere le mani in pasta i
 Uno SparkContext è il punto di accesso ai servizi di Spark e, quindi, il fulcro di un'applicazione Spark. Infatti, un'applicazione Spark può essere considerata tale, quando usa (direttamente o non) un'instanza di questa classe.
 \newline
 Esso imposta i servizi interni e stabilisce una connessione a un'ambiente di esecuzione Spark.
-\par Una volta instanziato è possibile creare RDD \ref{sec:RDD}, broadcast \ref{sec:broadcasts} e accumulators \ref{sec:aoccumulators}, accedere ai servizi Spark ed eseguire i job (finchè lo SparkContext non viene stoppato).
 
-Un SparkContext è essenzialmente un client dell'ambiente di esecuzione di Spark e funge da master dell'applicazione Spark (da non confondersi dal concetto di master in Spark, che verrà spiegato in seguito).
-
-Tra le funzionalità principali ci sono:
+Un SparkContext è essenzialmente un client dell'ambiente di esecuzione di Spark e funge da master dell'applicazione Spark (da non confondersi dal concetto di master in Spark, che verrà spiegato in seguito). Tra le funzionalità principali ci sono:
 \begin{itemize}
 	\item capire lo stato corrente dell'applicazione;
 	\item impostare la configurazione;
-	\item creare entità distribuite;
+	\item creare entità distribuite:  creare RDD \ref{sec:RDD}, broadcast \ref{sec:broadcasts} e accumulators \ref{sec:aoccumulators};
 	\item accedere ai servizi di Spark;
 	\item gestione dei jobs;
 	\item gestione della persitenza.
 \end{itemize}
 Per ciascuna JVM ci può essere al più una \textit{SparkContext}.
-Si può considereareuno SparkContext bisogna fornire una configurazione che nel caso generale corrisponde a SparkConf. Nel caso in cui si usano Dataset e DataFrame API, la \textit{SparkSession} facilità la configurazione con un builder dal quale poi si ottiene un'instanza di SparkContext. 
+Per creare considereare uno SparkContext potrebbe essere necessario fornire una configurazione che nel caso generale corrisponde a SparkConf, nel codice sottostante viene mostrato come creare uno SparkContext con o senza configurazione.
 
 \begin{lstlisting}
-
 import org.apache.spark.SparkContext
 val sc = SparkContext.getOrCreate()
 
 // Using an explicit SparkConf object
 import org.apache.spark.SparkConf
 val conf = new SparkConf()
-.setMaster("local[*]")
-.setAppName("SparkMe App")
+	.setMaster("local[*]")
+	.setAppName("SparkMe App")
 val sc = SparkContext.getOrCreate(conf)
-
 \end{lstlisting}
+La configuarazione imposta il nome dell'applicazione (\texttt{setAppName}) e il tipo di esecuzione con \texttt{setMaster} (di questo punto si discuterà in seguito). Queste due opzioni sono quelle necessarie da configurare, altre riguardano una principalemente la personalizzazione dell'ambiente di esecuzione (vedi documentazione).
+Esistono altri costruttori per creare uno SparkContext. Quella con la SparkConf, a mio avviso, risultà più fluente delle altre modalità.
 \subsubsection{SparkSession}\label{sec:SparkSession} 
-
+SparkSession è il punto di accesso per lavorare con dati strutturati (API DataFrame e Dataset), attraverso un builder dal quale poi si ottiene un'instanza di SparkContext specifica per l'ambiente (\texttt{SQLContext}). 
+Nell'esempio sottostante viene mostrato il suo utilizzo, in particolare è possibile fornire configurazioni, in questo caso viene configurato per usare hdfs.
+\lstinputlisting[language=Scala, firstline=15, lastline=18]{../src/main/scala/QuickStart.scala}
 \section{Internals}
 \subsection{Architettura}
 É possibile lanciare Spark essenzialmente in \textbf{due modalità}:
@@ -140,7 +139,7 @@ val sc = SparkContext.getOrCreate(conf)
 	\item \textbf{Submit di un job}: da command line, non supporta altri casi come l'avvio di spark da altre applicazioni anche se lo snippet di codice non è un jar (in caso di produzione).
 \end{enumerate}
 Queste modalità ci aprono al concetto di \textit{master-worker} (PCD) che nel ``dialetto di Spark" è noto come \textbf{``driver-executor"}.
-Essenzialmente posso usare Spark con o senza un vero cluster:
+Essenzialmente posso usare Spark con o senza un vero cluster (questo viene impostato nella \textit{SparkConf}):
 \begin{itemize}
 	\item \textbf{local mode}: uso in fase esplorativa per iniziare ad usare spark senza un effettivo cluster.
 	\item \textbf{con cluster}
@@ -149,10 +148,10 @@ Essenzialmente posso usare Spark con o senza un vero cluster:
 		\item \textbf{cluster mode}: il driver è nel cluster, la uso in produzione.
 	\end{itemize}
 \end{itemize}
-Quando eseguo Spark lo stato dei processi è visibile in una pagina web che viene linkata nel esecuzione del progesso (la \textbf{Spark UI}), in essa è possibile visualizzare come viene effettivamente distribuito il lavoro, lo stato del lavoro e i DAG. %TODO
+Quando eseguo Spark lo stato dei processi è visibile in una pagina web che viene linkata nel esecuzione del progesso (la \textbf{Spark UI}), in essa è possibile visualizzare come viene effettivamente distribuito il lavoro, lo stato del lavoro e i DAG \ref{sec:DAG}. 
 
-\textit{Chi controlla il cluster? Come Spark ottiene le risorse per driver e executor?}
-Il \textit{cluster manager}, il quale non viene offerto da Apache Spark. Tra i più noti abbiamo:
+\par Nel caso in cui si utilizzasse un cluster c'è da porsi una domanda: \textit{``Chi controlla il cluster? Come Spark ottiene le risorse per driver e executor?"}
+\newline La risposta è: il \textit{cluster manager} (Figura \ref{fig:SparkModules}), il quale non viene offerto da Apache Spark. Tra i più noti abbiamo:
 \begin{itemize}
 	\item\textbf{Apache YARN\footnote{\url{http://hadoop.apache.org/docs/stable/hadoop-yarn/hadoop-yarn-site/YARN.html}}}: il gestore delle risorse in Hadoop 2.
 	\item\textbf{Apache Mesos\footnote{\url{http://mesos.apache.org}}}: generale che può anche eseguire Hadoop MapReduce e le applicazioni di servizio.
@@ -160,7 +159,7 @@ Il \textit{cluster manager}, il quale non viene offerto da Apache Spark. Tra i p
 	\item\textbf{Standalone\footnote{\url{https://spark.apache.org/docs/latest/spark-standalone.html}}}: semplice, facile e veloce. Incluso in Spark, semplifica la configurazione di un cluster. Non ancora adatto per fasi di produzione. 
 \end{itemize}
 
-
+%TODO DA QUI
 \subsection{RDDs  e tasks}
 \subsubsection{Resilient Distributed Datasets (RDDs)}\label{sec:RDD}
 Spark ruota attorno al concetto di RDD, ovvero una collection fault-tollerant che può essere processata in parallelo. Ci sono due modi per creare un RDD: parellelizzando una collezione esistente nel tuo driver program o facendo riferimento a un archivio di dati esterno (come filesystem condivisi, HDFS, Hbase o qualsiasi input che ha dati in formato Hadoop).
@@ -177,6 +176,7 @@ Con `collect` si ritorna dagli executor al driver.
 %TODO Nota interessante, in Scala, DataFrame è così definito ``type DataFrame = Dataset[Row]" \footnote{\url{https://spark.apache.org/docs/2.4.4/api/scala/index.html}}, ciò significa che su un DataFrame posso chiamare tutti i metodi del Dataset.
 
 \subsection{Execution Model} %TODO
+
 \begin{itemize}
 	\item Crea DAG di RDDs per rappresentare la computazione;
 	\item Crea piano di esecuzione logico del DAG;
@@ -212,19 +212,28 @@ Bisogna fissare questo numero nell'intervallo compreso tra:
 \end{itemize}
 
 %TODO (da vedere https://databricks.com/session/a-deeper-understanding-of-spark-internals da min. 22)
-
+\subsubsection{DAG (Directed Acyclic Graph) }\label{sec:DAG}
+Un \textbf{DAG} è un grafo diretto senza cicli, dove i nodi rappresentano gli RDD e gli archi le operazioni da applicare su essi. Un esempio di DAG è mostrato in Figura \ref{fig:DAG}.
+A fronte della chiamata di un'azione \ref{sec:actions}, il DAG creato viene inviato al DAG Scheduler che suddivide ulteriormente il grafo negli stage dell'attività.
+\par Un DAG consente all'utente di comprendere effettivamente cosa sta accadendo, anche in merito agli shuffle e gli stage.
+\begin{figure}
+	\centering 
+	\includegraphics[width=0.6\linewidth]{img/DAG.png}
+	\caption{Esempio DAG di Spark. Immagine tratta da \url{https://databricks.com}}
+	\label{fig:DAG}
+\end{figure}
 \section{Moduli di Spark}
 \subsection{Iniziare a lavorarare con Spark e gli RDDs}
 Ci sono due operazioni fondamentali che vengono fatte sui dati, che rispecchiano essenzialemente il principio \textit{map-reduce}:
 \begin{itemize}
-	\item \textbf{transformations}: ovvero operazioni di map \textit{map}, sono lazy l'eventuale azione su di essa applicherà la trasformazione. Eventualmente è possibile rendere questi cambiamenti persistenti (con l'opportuno persist), altrimenti non lo sono.
-	\item \textbf{actions}: ovvero operazioni di map \textit{reduce}.
+	\item \textbf{transformations}: ovvero operazioni di \textit{map}, sono lazy l'eventuale azione su di essa applicherà la trasformazione. Eventualmente è possibile rendere questi cambiamenti persistenti (con l'opportuno persist), altrimenti non lo sono.
+	\item \textbf{actions}\label{sec:actions}: ovvero operazioni di \textit{reduce}.
 \end{itemize}
 La Figura \ref{fig:RDDs} mostra l'intero meccanismo di RDDs e trasformazioni e azioni.
 \begin{figure}
 	\centering 
 	\includegraphics[width=1\linewidth]{img/rdds.png}
-	\caption{RDDs e meccanismo di trasformations e actions.https://docs.incorta.com/ \url{http://sparkforbeginners.blogspot.com}}
+	\caption{RDDs e meccanismo di trasformations e actions. Immagine tratta da \url{http://sparkforbeginners.blogspot.com}}
 	\label{fig:RDDs}
 \end{figure}
 \par Per passare funzioni a Spark nel sito viene mostrato come sfruttare map su un RDDs applicandoci una propria funzione che prende in input un dato dello stresso tipo di quello contenuto nel RDDs. Secondo me questo aspetto da un lato obbliga il programmatore ad appoggiarsi alle API fornite dal framework e quindi ottimizzate da Spark, dall'altro pone dei limiti nel come il programmatore vuole approcciarsi ai dati. Limite che viene abbastanza ridotto dalla potenza e dalla facilità di comprensione del DLS che Spark mette a disposizione.
