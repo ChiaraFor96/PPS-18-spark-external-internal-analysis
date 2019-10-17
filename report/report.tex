@@ -19,7 +19,7 @@
 backend=biber,
 ]{biblatex}
 \addbibresource{bibliography.bib}
-
+%TODO readme.md + BI (cubo e etl)
 \title{PPS18  --- Spark-external-internal-analysis}
 \author{Chiara Forresi, matr: 880050, email: {\url{chiara.forresi@studio.unibo.it}}}
 \date{\today}
@@ -132,6 +132,7 @@ SparkSession è il punto di accesso per lavorare con dati strutturati (API DataF
 Nell'esempio sottostante viene mostrato il suo utilizzo, in particolare è possibile fornire configurazioni, in questo caso viene configurato per usare hdfs.
 \lstinputlisting[language=Scala, firstline=15, lastline=18]{../src/main/scala/QuickStart.scala}
 \section{Internals}
+Maggiori dettagli sulla struttura interna di Spark \cite{internals}.
 \subsection{Architettura}
 É possibile lanciare Spark essenzialmente in \textbf{due modalità}:
 \begin{enumerate}
@@ -141,7 +142,7 @@ Nell'esempio sottostante viene mostrato il suo utilizzo, in particolare è possi
 Queste modalità ci aprono al concetto di \textit{master-worker} (PCD) che nel ``dialetto di Spark" è noto come \textbf{``driver-executor"}.
 \begin{figure}
 	\centering 
-,	\includegraphics[width=0.8\linewidth]{img/cluster-overview.png}
+	\includegraphics[width=0.8\linewidth]{img/cluster-overview.png}
 	\caption{Driver-executor in relazione a Cluster Manager. Immagine tratta da \cite{spark}}
 	\label{fig:driverexecutor}
 \end{figure}
@@ -175,10 +176,8 @@ Poichè Dataset e DataFrame (API di dati strutturati) ereditano da RDDs (non str
 Quando viene letto un file è possibile specificare il numero di \textbf{partizioni di un RDD} che (guarda caso) coincide con il corrispondente \textbf{numero di task}.
 Ovviamente, numero executors e di task sono effettivamente correlati e quindi bisogna specificare il numero di conseguenza.
 
-Si lavora in \textbf{stage}, uno stage rappresenta un periodo (una o più funzione chiamata sui dati) in cui non è necessario uno shuffle, ovvero non è necessario spostare i dati tra le partizioni. Se i dati devono muoversi (es. reduceByKey) bisogna ripartizionare i dati (\textit{shuffle \& sort}).
+Si lavora in \textbf{stage}, uno stage rappresenta un periodo (una o più funzione chiamata sui dati) in cui non è necessario uno shuffle, ovvero non è necessario spostare i dati tra le partizioni (\textbf{data locality}). Se i dati devono muoversi (es. reduceByKey) bisogna ripartizionare i dati (\textit{shuffle \& sort}).
 Con \textit{collect} si ritorna dagli executor al driver.
-
-%TODO Nota interessante, in Scala, DataFrame è così definito ``type DataFrame = Dataset[Row]" \footnote{\url{https://spark.apache.org/docs/2.4.4/api/scala/index.html}}, ciò significa che su un DataFrame posso chiamare tutti i metodi del Dataset.
 
 \subsubsection{DAG (Directed Acyclic Graph) }\label{sec:DAG}
 Un \textbf{DAG} è un grafo diretto senza cicli, dove i nodi rappresentano gli RDD e gli archi le operazioni da applicare su essi. Un esempio di DAG è mostrato in Figura \ref{fig:DAG}.
@@ -190,7 +189,6 @@ A fronte della chiamata di un'azione \ref{sec:actions}, il DAG creato viene invi
 	\caption{Esempio DAG di Spark. Immagine tratta da \url{https://databricks.com}}
 	\label{fig:DAG}
 \end{figure}
-
 \subsection{Modello di esecuzione} 
 Il modello di esecuzione di Spark, visibile - durante l'esecuzione - nel dettaglio nella Spark UI (http://:4040), può essere diviso nelle seguenti macro-fasi (come mostrato in Figura \ref{fig:model}):
 \begin{enumerate}
@@ -239,8 +237,7 @@ Bisogna fissare questo numero nell'intervallo compreso tra:
 	\item \textbf{lower bound}:  almeno circa il doppio del numero di core di un cluster;
 	\item \textbf{upper bound}: essere sicuri che un task venga eseguito in almeno 100ms.
 \end{itemize}
-
-%TODO (da vedere https://databricks.com/session/a-deeper-understanding-of-spark-internals da min. 22)
+Quindi analizzando Spark UI e dai DAG, si capisce cosa effettivamente sta succedendo nel Cluster e si comprende quale soluzione è la migliore. Non è detto che la soluzione migliore in termine di moviementi di dati, sia quella con un codice più compatto ed ``esteticamente" migliore.
 \section{Moduli di Spark}
 \subsection{Iniziare a lavorarare con Spark e gli RDDs}
 Ci sono due operazioni fondamentali che vengono fatte sui dati, che rispecchiano essenzialemente il principio \textit{map-reduce}:
@@ -272,15 +269,6 @@ Questo modulo consiste in:
 	\item \textit{Persistenza}: salvare e eseguire algoritmi, modelli e pipeline.
 	\item \textit{Utility}: algebra lineare, statistica, gestione dati, etc.
 \end{itemize}
-%TODO da qui
-\subsection{Spark SQL}
-Modulo di supporto a dati strutturati, fornisce maggiori ottimizzazioni rispetto a RDD. L'interazione con i dati è possibile in vari modi, tra cui SQL e Dataset API.
-Nella computazione viene usato un unico engine di esecuzione, il programmatore può esprire le cose nel modo che ritiene più naturale. Uso di Hive, JDBC, etc. 
-Non credo questo sia interessante sul lato PPS. %TODO
-\subsubsection{Dataset API}
-Operazioni con cui interrogare il Dataset. 
-Un Dataset si può creare anche ``on the fly" da un file di testo o appartenere a determinati formati (es. Hadoop HDFS) o trasformando altri Dataset.
-Nelle interrogazioni che lo richiedono vengono passate funzioni, per cui possono entrare in gioco aspetti di PPS. Questa parte verrà meglio sviscerata in seguito. %TODOs
 \subsection{GraphX Programming}
 Componente Spark per Grafi e calcolo graph-parallel.
 
@@ -301,7 +289,23 @@ Nella costruzione vengono richiesti:
 	\item un vertice di default (pozzo).
 \end{itemize}
 \subsection{SparkR (R on Spark)}
-SparkR è un pacchetto R che fornisce un frontend leggero per utilizzare Apache Spark da R. In Spark 2.4.4, SparkR fornisce un'implementazione di data frame distribuiti che supporta operazioni come selezione, filtro, aggregazione ecc. (simile a data frame R, dplyr) ma su set di dati di grandi dimensioni. SparkR supporta inoltre l'apprendimento automatico distribuito tramite MLlib.
+SparkR è un pacchetto R che fornisce un frontend leggero per utilizzare Apache Spark da R. In Spark 2.4.4, SparkR fornisce un'implementazione di data frame distribuiti che supporta operazioni come selezione, filtro, aggregazione ecc. (simile a data frame R, dplyr\footnote{\url{https://www.rdocumentation.org/packages/dplyr}}) ma su set di dati di grandi dimensioni. SparkR supporta inoltre l'apprendimento automatico distribuito tramite MLlib.
+
+%TODO da qui
+\subsection{Spark SQL}
+Modulo di supporto a dati strutturati, fornisce maggiori ottimizzazioni rispetto a RDD. L'interazione con i dati è possibile in vari modi, tra cui SQL e Dataset API.
+Nella computazione viene usato un unico engine di esecuzione, il programmatore può esprire le cose nel modo che ritiene più naturale. Uso di Hive, JDBC, etc. 
+\newline
+Di seguito parlerò degli aspetti più interessanti e pratici, di questo modulo.
+\par Dei benchmarks\footnote{\url{https://blog.knoldus.com/spark-rdd-vs-dataframes}} dimostrano che i DataFrame sono più ottimizzati in termini di elaborazione e forniscono più opzioni per aggregazioni e altre operazioni con una varietà di funzioni disponibili (molte più funzioni sono ora supportate nativamente in Spark 2.4).
+\subsubsection{Dataset API}
+Operazioni con cui interrogare il Dataset. 
+\par Nota interessante, in Scala, DataFrame è così definito ``type DataFrame = Dataset[Row]" \footnote{\url{https://spark.apache.org/docs/2.4.4/api/scala/index.html}}.
+\par Un Dataset si può creare anche ``on the fly" da un file di testo o appartenere a determinati formati (es. Hadoop HDFS) o trasformando altri Dataset.
+Nelle interrogazioni che lo richiedono vengono passate funzioni, per cui possono entrare in gioco aspetti di PPS, i quali verranno meglio sviscerati nella sezione sullo Streaming Strutturato \ref{sec:structuredstreaming}.%TODO va bene
+\par Nell'esempio \texttt{src/main/scala/QuickStart.scala} viene mostrato come l'utilizzo di queste API renda maggiormente fluente le interrogazioni su un container docker (\texttt{src/main/docker}) con dati in HDFS.
+\newline 
+Le stesse interrogazioni, senza il supporto dell'API SparkSQL, ma del solo SparkCore, sarebbero state sicuramente meno leggibili.%TODO rifai l'esempio senza sql
 
 \subsection{Moduli per lavorare con stream di dati}
 \subsubsection{Spark Streaming}
@@ -338,11 +342,9 @@ Ci sono due ulteriori parametri, oltre al batch interval, da tarare:
 \par Con Spark Streaming, non ci sono restrizioni per utilizzare qualsiasi tipo di sink (``\texttt{foreachRDD}"). %TODO
 
 \par La novità e il maggior supporto sembra sia in Spark Structured Streaming.
-\subsubsection{Spark Structured Streaming}
+\subsubsection{Spark Structured Streaming}\label{sec:structuredstreaming}
 Streaming strutturato, costruito sopra a Spark SQL e dunque con supporto a DataFrame e DataSet. 
 Sostanzialmente è possibile riuso totale del codice scritto per interrogazioni statiche su SparkSQL.
-
-Dei benchmarks\footnote{\url{https://blog.knoldus.com/spark-rdd-vs-dataframes}} dimostrano che i DataFrame sono più ottimizzati in termini di elaborazione e forniscono più opzioni per aggregazioni e altre operazioni con una varietà di funzioni disponibili (molte più funzioni sono ora supportate nativamente in Spark 2.4).
 
 Non c'è il concetto di batch di Spark Streaming, assomiglia più a uno stream Real Time.
 In ogni caso sotto si procede micro batch, dalla versione 2.3 di spark è stato aggiunto il concetto di \textit{Continuous Processing} che ha ridotto ulteriormente la latenza.
