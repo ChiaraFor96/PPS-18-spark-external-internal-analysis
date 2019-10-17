@@ -4,15 +4,15 @@ launch notes:
 - docker build -t container-name . (from docker/ folder)
 - docker run -ti --hostname hadoop -p 50070:50070 -p 9000:9000 -p 50075:50075 -p 50010:50010 container-name
 */
-object QuickStart {
+object QuickStartSparkSQL {
 
   import org.apache.spark.sql.functions._
   import org.apache.spark.sql.{Column, DataFrame, SQLContext, SparkSession}
 
   def main ( args: Array[String] ): Unit = {
     val log = org.apache.log4j.Logger.getLogger ( getClass.getName )
-// TODO try in cluster!
-    val sc = SparkSession.builder ().appName ( "Quick start" )
+
+    val sc = SparkSession.builder ().appName ( "Quick start SparkSQL" )
       .master ( "local[*]" )
       .config ( "spark.hadoop.dfs.client.use.datanode.hostname", "true" )
       .getOrCreate ().sqlContext
@@ -38,8 +38,8 @@ object QuickStart {
       .groupBy ( "movieId" ).count.sort ( desc ( "count" ) ).limit ( 3 )
       .join ( movies, "movieId" ).select ( "title", "count" ).show ()
 
-    Thread.sleep ( 20000000 ) //for see on the spark UI
-    sc.sparkSession.close ()
+    // Thread.sleep ( 20000000 ) for see on the spark UI
+    sc.sparkContext.stop
   }
 
   def loadDF ( sqlContext: SQLContext, filePath: String ): DataFrame = sqlContext.read
