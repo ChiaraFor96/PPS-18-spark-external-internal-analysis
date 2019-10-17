@@ -15,7 +15,7 @@ object SparkStructuredStreaming {
     import org.apache.spark.sql.functions._
     import org.apache.spark.sql.streaming.Trigger
     import org.apache.spark.sql.types.{StructType, DataTypes}
-    import structuredStreaming.StreamingDataOrganizerUtils.CalendarInterval.Seconds
+    import structuredStreaming.StreamingDataOrganizerUtils.CalendarInterval._
     import spark.implicits._
 
     val datasets: Seq[Dataset[StreamRecord]] = Seq ( getRateDataset ( 10 ),
@@ -56,7 +56,7 @@ object SparkStructuredStreaming {
 
     computedDatasets.join(externalSource, idColumn.name)
       .withWatermark ( avgTimestampColumn.name, Seconds(5).toString )
-      .groupBy ( window ( avgTimestampColumn, Seconds(10).toString, Seconds(5).toString ) )
+      .groupBy ( window ( avgTimestampColumn, Minutes(1).toString, Seconds(30).toString ) )
       .agg ( mean(avgValueColumn.name).as("InternalAVG"), mean( valueColumn.name ).as("ExternalAVG") )
 
       .writeStream
