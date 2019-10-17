@@ -12,6 +12,8 @@
 \usepackage{csquotes}
 \usepackage{filecontents}
 \usepackage{titlesec}
+\usepackage{listings}
+\lstloadlanguages{scala}
 \newcommand{\sectionbreak}{\clearpage}
 \usepackage[
 backend=biber,
@@ -42,8 +44,8 @@ Si tratta di una completa alternativa al `map-reduce' di Hadoop \footnote{\url{h
 	\item \textbf{Computer Engine}: fornisce funzioni basilari come gestione della memoria, scheduling dei task, recupero guasti, interagisce con il Cluster Manager (che non viene fornito da Spark).
 	\item \textbf{Spark Core} APIS che consiste in due API:
 	\begin{itemize}
-		\item strutturate: DataFrame e Dataset, ottimizzate per lavorare con dati strutturati
-		\item non strutturate: RDDs, variabili Accumulators e Broadcast
+		\item \textit{strutturate}: DataFrame e Dataset, ottimizzate per lavorare con dati strutturati
+		\item \textit{non strutturate}: RDDs, variabili Accumulators e Broadcast
 	\end{itemize}
 \end{itemize}
 Sopra a \textit{SparkCore} troviamo principalemente, come mostrato in Figura \ref{fig:SparkModules}, i seguenti moduli:
@@ -60,11 +62,11 @@ Essi offrono API, DLS e algoritmi in più linguaggi e dipendono direttamente dal
 	\caption{Archiettura di Spark. Immagine tratta da \url{https://docs.incorta.com/}}
 	\label{fig:SparkModules}
 \end{figure}
-\par Vista la varietà di funzionalità che Spark offre, in questo progetto ci si focalizzerà maggiormente sulle funzionalità di SparkCore e sulle modalità di gestione di Streaming di dati. In entrambi i casi l'analisi verrà svolta si da un punto di vista estereriore di quello che offre il framework che quello interiore, andando a sviscerare le caretteristiche e i punti peculiari (positivi o negativi) che emergono dall'analisi. 
+\par Vista la varietà di funzionalità che Spark offre, in questo progetto ci si focalizzerà maggiormente sulle funzionalità di SparkCore e sulle modalità di gestione di Streaming di dati. In entrambi i casi l'analisi verrà svolta sia da un punto di vista estereriore di quello che offre il framework che quello interiore, andando a sviscerare le caretteristiche e i punti peculiari (positivi o negativi) che emergono dall'analisi. 
 \newline
-Si sottolinea che in questo progetto è stata utilizzata l'ultima versione disponibile di Spark, ovvero la \textbf{2.4.4}. Per cui per maggiori dettagli si rimanda al sito di Spark \cite{spark}.
+Si sottolinea che in questo progetto è stata utilizzata l'ultima versione disponibile di Spark, ovvero la \textbf{2.4.4}, in \textit{Scala}. Per cui per maggiori dettagli si rimanda alla relativa pagina di Spark \cite{spark}.
 \subsection{Perchè Spark è così importante?}
-L'importanza di Spark è data soprattutto dal fatto che in un'unico framework vengono create interesioni di vario genere che fanno si che esso sia una piattaforma a tutto tondo. Questi punti sintetizzano i motivi principali dell'importanza di Spark:
+L'importanza di Spark è data soprattutto dal fatto che in un'unico framework vengono create interezioni di vario genere che fanno sì che esso sia una piattaforma a tutto tondo. Questi punti sintetizzano i motivi principali dell'importanza di Spark:
 \begin{itemize}
 	\item Astrae la programmazione parallela, non sembra di lavorare su un cluster di computer.
 	Nello scenario migliore sembrerà di lavorare con un database (SQL), nel peggiore di lavorare su Collections.
@@ -72,26 +74,70 @@ L'importanza di Spark è data soprattutto dal fatto che in un'unico framework ve
 	\item Facile da usare, leggere e capire.
 \end{itemize}
 \subsection{Un primo approccio a Spark}
-Per prendere confidenzialità con Spark, così come abbiamo fatto con Scala, può essere utile utilizzare la REPL (anche nota come \textbf{spark-shell}). 
+Per prendere confidenzialità con Spark, così come abbiamo fatto con Scala, può essere utile utilizzare un'estensione della REPL si Scala per Spark (anche nota come \textbf{spark-shell}). 
 Utilizzarla con Spark è molto semplice:
 \begin{itemize}
-	\item basta andare nell'url \url{https://spark.apache.org/downloads.html} e scaricare l'ultima versione di Spark compresa di Hadoop;
+	\item \item basta andare nell'url \url{https://spark.apache.org/downloads.html} e scaricare l'ultima versione di Spark (compresa di Hadoop);
 	\item decomprimere la cartella e posizionarsi all'interno di essa da terminale;
 	\item a questo punto lanciando il comando \texttt{./bin/spark-shell} partirà la shell.
 \end{itemize}
-Si può anche memorizzare questo percorso nel path di sistema e accedervi da qualsiasi parte del file system. Aggiungendo a ~/.bashrc:
+Si può anche memorizzare questo percorso nel path di sistema e accedervi da qualsiasi parte del file system. Aggiungendo a \texttt{{\raise.17ex\hbox{$\scriptstyle\sim$}}/.bashrc}:
 \begin{itemize}
 	\item \texttt{export SPARK\_HOME="percorso della cartella decompressa"} 
 	\item \texttt{export PATH=$PATH:$SPARK\_HOME/bin:\$SPARK\_HOME/sbin}
 \end{itemize}
+Nella spark-shell vi sono già :
+\begin{itemize}
+	\item un'instanza di \texttt{SparkSession} \ref{sec:SparkSession} nominata \textit{spark};
+	\item un'instanza di \texttt{SparkContext} \ref{sec:SparkContext} nominata \textit{sc};
+	\item l'importazione dei moduli:
+	\begin{itemize}
+		\item \texttt{spark.implicits.\_}: per avere a disposizione una serie di impliciti utili nella lettura e nella manipolazione dei dati facenti parti della SparkSession;
+		\item \texttt{spark.sql}: per utilizzare le funzionalità e le strutture dati strutturate.
+	\end{itemize}
+\end{itemize}
+Seguendo il tutorial \cite{localexample} è possibile mettere le mani in pasta in locale su un dataset e esplorare le potenzialità di Spark (in particolare Spark SQL) e, soprattutto, del DLS che esso fornisce.
+\subsubsection{SparkContext}\label{sec:SparkContext} 
+Uno SparkContext è il punto di accesso ai servizi di Spark e, quindi, il fulcro di un'applicazione Spark. Infatti, un'applicazione Spark può essere considerata tale, quando usa (direttamente o non) un'instanza di questa classe.
+\newline
+Esso imposta i servizi interni e stabilisce una connessione a un'ambiente di esecuzione Spark.
+\par Una volta instanziato è possibile creare RDD \ref{sec:RDD}, broadcast \ref{sec:broadcasts} e accumulators \ref{sec:aoccumulators}, accedere ai servizi Spark ed eseguire i job (finchè lo SparkContext non viene stoppato).
 
-Seguendo il tutoria \cite{localexample} è possibile mettere le mani in pasta in locale su un dataset e esplorare le potenzialità di Spark (in particolare Spark SQL) e, soprattutto, del DLS che esso fornisce.
+Un SparkContext è essenzialmente un client dell'ambiente di esecuzione di Spark e funge da master dell'applicazione Spark (da non confondersi dal concetto di master in Spark, che verrà spiegato in seguito).
+
+Tra le funzionalità principali ci sono:
+\begin{itemize}
+	\item capire lo stato corrente dell'applicazione;
+	\item impostare la configurazione;
+	\item creare entità distribuite;
+	\item accedere ai servizi di Spark;
+	\item gestione dei jobs;
+	\item gestione della persitenza.
+\end{itemize}
+Per ciascuna JVM ci può essere al più una \textit{SparkContext}.
+Si può considereareuno SparkContext bisogna fornire una configurazione che nel caso generale corrisponde a SparkConf. Nel caso in cui si usano Dataset e DataFrame API, la \textit{SparkSession} facilità la configurazione con un builder dal quale poi si ottiene un'instanza di SparkContext. 
+
+\begin{lstlisting}
+
+import org.apache.spark.SparkContext
+val sc = SparkContext.getOrCreate()
+
+// Using an explicit SparkConf object
+import org.apache.spark.SparkConf
+val conf = new SparkConf()
+.setMaster("local[*]")
+.setAppName("SparkMe App")
+val sc = SparkContext.getOrCreate(conf)
+
+\end{lstlisting}
+\subsubsection{SparkSession}\label{sec:SparkSession} 
+
 \section{Internals}
 \subsection{Architettura}
 É possibile lanciare Spark essenzialmente in \textbf{due modalità}:
 \begin{enumerate}
-	\item \textbf{interattiva}
-	\item \textbf{submit di un job} (in caso di produzione). 
+	\item \textbf{Interattiva (spark-shell)}: si tratta di un potente strumento per analizzare in modo interattivo e controllare lo stato delle attività nel Cluster. Non è raccomandabile usarlo in scenari reali.
+	\item \textbf{Submit di un job}: da command line, non supporta altri casi come l'avvio di spark da altre applicazioni anche se lo snippet di codice non è un jar (in caso di produzione).
 \end{enumerate}
 Queste modalità ci aprono al concetto di \textit{master-worker} (PCD) che nel ``dialetto di Spark" è noto come \textbf{``driver-executor"}.
 Essenzialmente posso usare Spark con o senza un vero cluster:
@@ -116,7 +162,7 @@ Il \textit{cluster manager}, il quale non viene offerto da Apache Spark. Tra i p
 
 
 \subsection{RDDs  e tasks}
-\subsubsection{Resilient Distributed Datasets (RDDs)}
+\subsubsection{Resilient Distributed Datasets (RDDs)}\label{sec:RDD}
 Spark ruota attorno al concetto di RDD, ovvero una collection fault-tollerant che può essere processata in parallelo. Ci sono due modi per creare un RDD: parellelizzando una collezione esistente nel tuo driver program o facendo riferimento a un archivio di dati esterno (come filesystem condivisi, HDFS, Hbase o qualsiasi input che ha dati in formato Hadoop).
 
 \subsubsection{RDDs e conseguenze}
@@ -169,12 +215,7 @@ Bisogna fissare questo numero nell'intervallo compreso tra:
 
 \section{Moduli di Spark}
 \subsection{Iniziare a lavorarare con Spark e gli RDDs}
-Per iniziare a usare Spark bisogna comprendere il concetto principale di \textit{SparkContext}.
-Per ciascuna JVM ci può essere al più una \textit{SparkContext}, si tratta del il punto di ingresso principale per la funzionalità Spark. Uno SparkContext rappresenta la connessione a un cluster Spark e può essere utilizzato per creare RDD, accumulatori e trasmettere variabili su quel cluster. 
-
-A uno SparkContext bisogna fornire una configurazione che nel caso generale corrisponde a SparkConf. Nel caso in cui si usano Dataset e DataFrame API, la \textit{SparkSession} facilità la configurazione con un builder dal quale poi si ottiene un'instanza di SparkContext. 
-%TODO example???
-\par Ci sono due operazioni fondamentali che vengono fatte sui dati, che rispecchiano essenzialemente il principio \textit{map-reduce}:
+Ci sono due operazioni fondamentali che vengono fatte sui dati, che rispecchiano essenzialemente il principio \textit{map-reduce}:
 \begin{itemize}
 	\item \textbf{transformations}: ovvero operazioni di map \textit{map}, sono lazy l'eventuale azione su di essa applicherà la trasformazione. Eventualmente è possibile rendere questi cambiamenti persistenti (con l'opportuno persist), altrimenti non lo sono.
 	\item \textbf{actions}: ovvero operazioni di map \textit{reduce}.
@@ -192,8 +233,8 @@ La Figura \ref{fig:RDDs} mostra l'intero meccanismo di RDDs e trasformazioni e a
 \par Una delle cose più difficili di Spark è comprendere l'ambito e il ciclo di vita di variabili e metodi quando si esegue il codice in un cluster. Le operazioni RDD che modificano le variabili al di fuori del loro ambito di applicazione possono essere una fonte frequente di confusione. C'è sostanzialmente un problema di concorrenza e della \textit{closure} rispetto all'ambito di lavoro di un task che Spark risolve con l'inserimento di due concetti:
 %TODO meglio??
 \begin{enumerate}
-	\item \textbf{broadcasts}:  consentono al programmatore di mantenere una variabile di sola lettura memorizzata nella cache su ogni macchina anziché inviarne una copia con le attività. Possono essere utilizzati, ad esempio, per fornire ad ogni nodo una copia di un set di dati di input di grandi dimensioni in modo efficiente. Spark tenta anche di distribuire variabili di trasmissione utilizzando algoritmi di trasmissione efficienti per ridurre i costi di comunicazione.
-	\item \textbf{accumulators}: sono variabili che vengono “aggiunte” solo attraverso un'operazione associativa e commutativa e possono quindi essere supportate in modo efficiente in parallelo. Possono essere utilizzati per implementare contatori (come in MapReduce) o somme. Spark supporta nativamente accumulatori di tipi numerici e i programmatori possono aggiungere il supporto per nuovi tipi. Vale sempre il concetto lazy (vedi trasformazioni).
+	\item \textbf{broadcasts}\label{sec:broadcasts}:  consentono al programmatore di mantenere una variabile di sola lettura memorizzata nella cache su ogni macchina anziché inviarne una copia con le attività. Possono essere utilizzati, ad esempio, per fornire ad ogni nodo una copia di un set di dati di input di grandi dimensioni in modo efficiente. Spark tenta anche di distribuire variabili di trasmissione utilizzando algoritmi di trasmissione efficienti per ridurre i costi di comunicazione.
+	\item \textbf{accumulators}\label{sec:aoccumulators}: sono variabili che vengono “aggiunte” solo attraverso un'operazione associativa e commutativa e possono quindi essere supportate in modo efficiente in parallelo. Possono essere utilizzati per implementare contatori (come in MapReduce) o somme. Spark supporta nativamente accumulatori di tipi numerici e i programmatori possono aggiungere il supporto per nuovi tipi. Vale sempre il concetto lazy (vedi trasformazioni).
 \end{enumerate}
 \subsection{Machine Learning Library (MLlib)}
 Questo modulo consiste in:
