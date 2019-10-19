@@ -1,4 +1,4 @@
-object TestValues {
+object MoviesTest {
   val numberOfMovies: Int = 9742
   val movieId: String = "movieId"
   val title: String = "title"
