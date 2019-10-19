@@ -31,10 +31,14 @@ object QuickStartBasic {
   }
 
   private def topThreeGenres ( moviesHeader: SimpleCSVHeader, moviesRows: RDD[Array[String]] ) {
-    /* TODO
-    movies.select ( split ( movies.col ( "genres" ), "\\|" ).as ( "genres" ) )
-      .select ( explode ( new Column ( "genres" ) ).as ( "genre" ) ).groupBy ( "genre" )
-      .count.show ( 3 )*/
+    val topTreeGenres = moviesRows.map(moviesHeader(_, MoviesTest.genres))
+      .flatMap(_.split("\\|"))
+      .map((_, 1))
+      .reduceByKey ( _ + _ )
+      .sortBy ( _._2, ascending = false )
+      .take(3)
+    //problems in parsing assert ( topTreeGenres sameElements MoviesTest.topTreeGenres )
+    println ( topTreeGenres )
   }
 
   private def threeMoviesWithMostTags ( sc: SparkContext, moviesHeader: SimpleCSVHeader, moviesRows: RDD[Array[String]] ): Unit = {
@@ -55,7 +59,7 @@ object QuickStartBasic {
     val moviesWithYears = moviesRows.map ( moviesHeader ( _, MoviesTest.title ) )
       .filter ( _.matches ( s"(.*)${MoviesTest.yearRegex}(.*)" ) )
       .count
-    //TODO assert(moviesWithYears == MoviesTest.moviesWithYears)
+    ////problems in parsing assert(moviesWithYears == MoviesTest.moviesWithYears)
     println ( s"#Movies with year: $moviesWithYears" )
   }
 
