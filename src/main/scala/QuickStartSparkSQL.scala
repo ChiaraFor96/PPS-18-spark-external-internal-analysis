@@ -5,6 +5,7 @@ launch notes:
 - docker run -ti --hostname hadoop -p 50070:50070 -p 9000:9000 -p 50075:50075 -p 50010:50010 container-name
 */
 object QuickStartSparkSQL {
+
   import org.apache.spark.sql.functions._
   import org.apache.spark.sql.{Column, DataFrame, SQLContext, SparkSession}
 
