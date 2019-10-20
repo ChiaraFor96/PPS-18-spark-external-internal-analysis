@@ -16,7 +16,7 @@ object MoviesTest {
     Movie ( 4, "Waiting to Exhale (1995)", Seq ( "Comedy", "Drama", "Romance" ) ),
     Movie ( 5, "Father of the Bride Part II (1995)", Seq ( "Comedy" ) ) ).map(_.toString)
 
-  val topTreeGenres : Seq[(String, Int)] = Seq(("Crime", 1199), ("Romance", 1596), ("Thriller", 1894))
+  val topTreeGenres : Seq[(String, Int)] = Seq(("Drama", 4361), ("Comedy", 3756), ("Thriller", 1894))
   val threeMoviesWithMostTags : Set[(String, Int)] = Set(("Pulp Fiction (1994)", 181), ("Fight Club (1999)", 54), ("2001: A Space Odyssey (1968)", 41))
 
   case class Movie ( movieId: Int, title: String, genres: Seq[String] ) {

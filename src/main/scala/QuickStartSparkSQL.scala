@@ -41,7 +41,7 @@ object QuickStartSparkSQL {
   private def topThreeGenres ( movies: DataFrame ): Unit = {
     val genresCount = movies.select ( split ( movies.col ( MoviesTest.genres ), "\\|" ).as ( MoviesTest.genres ) )
       .select ( explode ( new Column ( MoviesTest.genres ) ).as ( "genre" ) ).groupBy ( "genre" )
-      .count
+      .count.sort ( desc ( "count" ) )
     assert ( genresCount.take ( 3 ).map ( v => (v ( 0 ), v ( 1 )) ) sameElements MoviesTest.topTreeGenres )
     genresCount.show ( 3 )
   }
