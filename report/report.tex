@@ -59,7 +59,7 @@ Essi offrono API, DLS e algoritmi in più linguaggi e dipendono direttamente dal
 \begin{figure}[H]
 	\centering 
 	\includegraphics[width=0.8\linewidth]{img/sparkModules.png}
-	\caption{Archiettura di Spark. Immagine tratta da \url{https://docs.incorta.com/}}
+	\caption{Archiettura di Spark. Immagine tratta da \url{https://docs.incorta.com/}.}
 	\label{fig:SparkModules}
 \end{figure}
 \par Vista la varietà di funzionalità che Spark offre, in questo progetto ci si focalizzerà maggiormente sulle funzionalità di SparkCore e sulle modalità di gestione di Streaming di dati. In entrambi i casi l'analisi verrà svolta sia da un punto di vista estereriore di quello che offre il framework che quello interiore, andando a sviscerare le caretteristiche e i punti peculiari (positivi o negativi) che emergono dall'analisi. 
@@ -143,7 +143,7 @@ Queste modalità ci aprono al concetto di \textit{master-worker} (PCD) che nel `
 \begin{figure}
 	\centering 
 	\includegraphics[width=0.8\linewidth]{img/cluster-overview.png}
-	\caption{Driver-executor in relazione a Cluster Manager. Immagine tratta da \cite{spark}}
+	\caption{Driver-executor in relazione a Cluster Manager. Immagine tratta da \cite{spark}.}
 	\label{fig:driverexecutor}
 \end{figure}
 Essenzialmente posso usare Spark con o senza un vero cluster (questo viene impostato nella \textit{SparkConf}):
@@ -186,7 +186,7 @@ A fronte della chiamata di un'azione \ref{sec:actions}, il DAG creato viene invi
 \begin{figure}[H]
 	\centering 
 	\includegraphics[width=0.6\linewidth]{img/DAG.png}
-	\caption{Esempio DAG di Spark. Immagine tratta da \url{https://databricks.com}}
+	\caption{Esempio DAG di Spark. Immagine tratta da \url{https://databricks.com}.}
 	\label{fig:DAG}
 \end{figure}
 \subsection{Modello di esecuzione} 
@@ -200,7 +200,7 @@ Nel caso in cui si volesse vedere graficamente, ad esecuzione terminata, il dett
 \begin{figure}[H]
 	\centering 
 	\includegraphics[width=1\linewidth]{img/model.png}
-	\caption{Job scheduling in Spark. Immagine tratta da \url{http://datastrophic.io}}
+	\caption{Job scheduling in Spark. Immagine tratta da \url{http://datastrophic.io}.}
 	\label{fig:model}
 \end{figure}
 Nel dettaglio le fasi sono le seguenti: %TODO deve essere messo meglio!
@@ -249,7 +249,7 @@ La Figura \ref{fig:RDDs} mostra l'intero meccanismo di RDDs e trasformazioni e a
 \begin{figure}
 	\centering 
 	\includegraphics[width=1\linewidth]{img/rdds.png}
-	\caption{RDDs e meccanismo di trasformations e actions. Immagine tratta da \url{http://sparkforbeginners.blogspot.com}}
+	\caption{RDDs e meccanismo di trasformations e actions. Immagine tratta da \url{http://sparkforbeginners.blogspot.com}.}
 	\label{fig:RDDs}
 \end{figure}
 \par Per passare funzioni a Spark nel sito viene mostrato come sfruttare map su un RDDs applicandoci una propria funzione che prende in input un dato dello stresso tipo di quello contenuto nel RDDs. Secondo me questo aspetto da un lato obbliga il programmatore ad appoggiarsi alle API fornite dal framework e quindi ottimizzate da Spark, dall'altro pone dei limiti nel come il programmatore vuole approcciarsi ai dati. Limite che viene abbastanza ridotto dalla potenza e dalla facilità di comprensione del DLS che Spark mette a disposizione, soprattutto in SparkSQL.
@@ -338,19 +338,19 @@ Un'esempio grafico di quello che accade con questo genere di trasformazioni è m
 \begin{figure}
 	\centering 
 	\includegraphics[width=0.8\linewidth]{img/sparkStreaming.png}
-	\caption{Funzionalità di Spark Streaming. Immagine tratta da \cite{spark}}
+	\caption{Funzionalità di Spark Streaming. Immagine tratta da \cite{spark}.}
 	\label{fig:SparkStreaming}
 \end{figure}
 \begin{figure}
 	\centering 
 	\includegraphics[width=1\linewidth]{img/sparkStreamingBatch.png}
-	\caption{Divisione micro-batch in Spark Streaming. Immagine tratta da \cite{spark}}
+	\caption{Divisione micro-batch in Spark Streaming. Immagine tratta da \cite{spark}.}
 	\label{fig:SparkStreamingBatch}
 \end{figure}
 \begin{figure}
 	\centering 
 	\includegraphics[width=0.8\linewidth]{img/sparkStreamingWindow.png}
-	\caption{Divisione dei DStream in finestre temporali. Immagine tratta da \cite{spark}}
+	\caption{Divisione dei DStream in finestre temporali. Immagine tratta da \cite{spark}.}
 	\label{fig:SparkStreamingWindow}
 \end{figure}
 \par Una nota di rilevanza fondamentale nello streaming, non supportata da questo modulo è che: esso non riesce a lavorare con il tempo dell'evento, ma solo con l'evento di Spark.
@@ -424,7 +424,7 @@ Operazioni supportate:
 \begin{itemize}
 	\item funzioni di base di SparkSQL 
 	\item Window based sliding
-	\item \textbf{UDF}\footnote{url{https://jaceklaskowski.gitbooks.io/mastering-spark-sql/spark-sql-udfs.html}}- User defined functions. Si tratta normalissime funzioni scala definite dall'utente, si possono tranquillamente considerare come "black box". Il tutto ha un senso unificato all'utilizzo di case class definite dall'utente rappresentative dei record. Qui nasce il forte senso di structured streaming e assieme al concetto di tempo è qui che secondo
+	\item \textbf{UDF}\footnote{\url{https://jaceklaskowski.gitbooks.io/mastering-spark-sql/spark-sql-udfs.html}}- User defined functions. Si tratta normalissime funzioni scala definite dall'utente, si possono tranquillamente considerare come "black box". Il tutto ha un senso unificato all'utilizzo di case class definite dall'utente rappresentative dei record. Qui nasce il forte senso di structured streaming e assieme al concetto di tempo è qui che secondo
 	me c'è il netto distacco con Spark Streaming. MA occhio all'uso di UDF, vedere i piani di esecuzione capire se effettivamente essendo scatole nere ottimizzano l'esecuzione o essa può essere resa meno leggibile ma più performante e comunque eseguibile con i meccanismi offerti da spark / spark sql...inoltre udf ha problemi di seriazzazione, ogni volta deve deserializzare e serializzare le colonne, quando possibile preferire le funzioni builtin che in SparkSQL non sono poche (org.apache.spark.sql.functions). Sono registrabili anche globalmente nella sessione. %TODO meglio
 	\item UDAF \footnote{\url{https://jaceklaskowski.gitbooks.io/mastering-spark-sql/spark-sql-UserDefinedAggregateFunction.html}} %TODO
 \end{itemize}
@@ -445,7 +445,7 @@ con DataFrame per eseguire operazioni custom.
 \begin{figure}
 	\centering 
 	\includegraphics[width=0.8\linewidth]{img/sparkStructuredStreaming.png}
-	\caption{Come Spark Structured Streaming mantiene i dati. Immagine tratta da \cite{structuredStreaming}}
+	\caption{Come Spark Structured Streaming mantiene i dati. Immagine tratta da \cite{structuredStreaming}.}
 	\label{fig:StructuredStreaming}
 \end{figure}
 \section{Limiti di Spark}
