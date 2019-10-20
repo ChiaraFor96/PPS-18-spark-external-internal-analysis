@@ -130,7 +130,7 @@ Esistono altri costruttori per creare uno SparkContext. Quella con la SparkConf,
 \subsubsection{SparkSession}\label{sec:SparkSession} 
 SparkSession è il punto di accesso per lavorare con dati strutturati (API DataFrame e Dataset), attraverso un builder dal quale poi si ottiene un'instanza di SparkContext specifica per l'ambiente (\texttt{SQLContext}). 
 Nell'esempio sottostante viene mostrato il suo utilizzo, in particolare è possibile fornire configurazioni, in questo caso viene configurato per usare hdfs.
-\lstinputlisting[language=Scala, firstline=15, lastline=18]{../src/main/scala/QuickStart.scala}
+\lstinputlisting[language=Scala, firstline=13, lastline=16]{../src/main/scala/QuickStartBasic.scala}
 \section{Internals}
 Maggiori dettagli sulla struttura interna di Spark \cite{internals}.
 \subsection{Architettura}
@@ -253,6 +253,7 @@ La Figura \ref{fig:RDDs} mostra l'intero meccanismo di RDDs e trasformazioni e a
 	\label{fig:RDDs}
 \end{figure}
 \par Per passare funzioni a Spark nel sito viene mostrato come sfruttare map su un RDDs applicandoci una propria funzione che prende in input un dato dello stresso tipo di quello contenuto nel RDDs. Secondo me questo aspetto da un lato obbliga il programmatore ad appoggiarsi alle API fornite dal framework e quindi ottimizzate da Spark, dall'altro pone dei limiti nel come il programmatore vuole approcciarsi ai dati. Limite che viene abbastanza ridotto dalla potenza e dalla facilità di comprensione del DLS che Spark mette a disposizione, soprattutto in SparkSQL.
+\par Un esempio di utilizzo di SparkCore senza l'ausilio di ulteriori moduli è presente nella classe \texttt{src/main/scala/QuickStartSparkBasic.scala}, vengono mostrati i limiti che si incontrano nel caso in cui non si utilizzano altri moduli di supporto (questo punto verrà compreso meglio nella sezione su SparkSQL \ref{sec:SparkSQL}).
 \par Per quanto riguarda il \textbf{caching}, oltre a persistent, esistono modalità per specificare a quale memoria far riferimento e funziona anche su dati presenti in molti nodi.
 \par Se andassi ad applicare \texttt{collect()} su una grande quantità di dati potrei incorrere in un \textit{``out of memory"}, per cui bisogna applicare concetti simili a quelli visti durante il corso di PPS. Ad esempio anzichè fare una stampa di tutti i dati, si vanno recuperare i primi N record con una \texttt{take(N)}.
 \par Una delle cose più difficili di Spark è comprendere l'ambito e il ciclo di vita di variabili e metodi quando si esegue il codice in un cluster. Le operazioni RDD che modificano le variabili al di fuori del loro ambito di applicazione possono essere una fonte frequente di confusione. C'è sostanzialmente un problema di concorrenza e della \textit{closure} rispetto all'ambito di lavoro di un task che Spark risolve con l'inserimento di due concetti:
@@ -292,7 +293,7 @@ Nella costruzione vengono richiesti:
 SparkR è un pacchetto R che fornisce un frontend leggero per utilizzare Apache Spark da R. In Spark 2.4.4, SparkR fornisce un'implementazione di data frame distribuiti che supporta operazioni come selezione, filtro, aggregazione ecc. (simile a data frame R, dplyr\footnote{\url{https://www.rdocumentation.org/packages/dplyr}}) ma su set di dati di grandi dimensioni. SparkR supporta inoltre l'apprendimento automatico distribuito tramite MLlib.
 
 %TODO da qui
-\subsection{Spark SQL}
+\subsection{Spark SQL}\label{sec:SparkSQL}
 Modulo di supporto a dati strutturati, fornisce maggiori ottimizzazioni rispetto a RDD. L'interazione con i dati è possibile in vari modi, tra cui SQL e Dataset API.
 Nella computazione viene usato un unico engine di esecuzione, il programmatore può esprire le cose nel modo che ritiene più naturale. Uso di Hive, JDBC, etc. 
 \newline
@@ -303,45 +304,69 @@ Operazioni con cui interrogare il Dataset.
 \par Nota interessante, in Scala, DataFrame è così definito ``type DataFrame = Dataset[Row]" \footnote{\url{https://spark.apache.org/docs/2.4.4/api/scala/index.html}}.
 \par Un Dataset si può creare anche ``on the fly" da un file di testo o appartenere a determinati formati (es. Hadoop HDFS) o trasformando altri Dataset.
 Nelle interrogazioni che lo richiedono vengono passate funzioni, per cui possono entrare in gioco aspetti di PPS, i quali verranno meglio sviscerati nella sezione sullo Streaming Strutturato \ref{sec:structuredstreaming}.%TODO va bene
-\par Nell'esempio \texttt{src/main/scala/QuickStart.scala} viene mostrato come l'utilizzo di queste API renda maggiormente fluente le interrogazioni su un container docker (\texttt{src/main/docker}) con dati in HDFS.
+\par Nell'esempio \texttt{src/main/scala/QuickStartSparkSQL.scala} viene mostrato come l'utilizzo di queste API renda maggiormente fluente le interrogazioni su un container docker (\texttt{src/main/docker}) con dati in HDFS in formato \textit{csv}.
 \newline 
-Le stesse interrogazioni, senza il supporto dell'API SparkSQL, ma del solo SparkCore, sarebbero state sicuramente meno leggibili.%TODO rifai l'esempio senza sql
+Le stesse interrogazioni, senza il supporto dell'API SparkSQL, ma del solo SparkCore, sono sicuramente meno leggibili e, come mostrato nell'esempio \texttt{QuickStartBasic.scala}, portano a dover gestire problematiche di basso livello sia a livello di interrogazioni che di parsing dei file. Queste problematiche (a questo livello) non dovrebbero interessare il programmatore, vengono efficientemente superate e gestite dal modulo SparkSQL.
 
 \subsection{Moduli per lavorare con stream di dati}
 \subsubsection{Spark Streaming}
-Spark Streaming, come mostrato in Figura \ref{fig:SparkStreaming}, raccoglie dati provenienti da varie fonti (es. Kafka, Flume, Kinesis o TCP sockets, file) li processa usando algoritmi complessi espressi attravervo funzioni high-level come \textit{map}, \textit{reduce}, \textit{join} e \textit{window}, e inserisce il risultato in File Systems (HDFS), Databases o Dashboard da eventualemente elaborare con le funzioni di spark ML e Graph.
+Spark Streaming, come mostrato in Figura \ref{fig:SparkStreaming}, raccoglie dati provenienti da varie fonti (es. Kafka, Flume, Kinesis o TCP sockets, file) e li processa usando algoritmi complessi espressi attravervo funzioni high-level come \textit{map}, \textit{reduce}, \textit{join} e \textit{window}. Infine, il risultato prodotto può essere inserito in File Systems (HDFS), Databases o Dashboard da eventualemente elaborare con le funzioni di Spark ML e Graph.
 
-Internamente Spark Streaming divide lo stream in batch di dati che vengono processati dalla Spark Engine.
-
+\par Internamente Spark Streaming, come mostrato in  Figura \ref{fig:SparkStreamingBatch}, divide lo stream in batch di dati che vengono processati dalla Spark Engine.
+\newline
 La lettura di uno streaming avviene tramite un \textbf{Receiver} ed eredita dall'astrazione \textbf{DStream}, si tratta di dati che provengono da varie fonti (es. Kafka, Flume, and Kinesis) o da operazione ad alto livello su altri DStream.
 Un DStream può essere considerato come una sequenza di RDDs.
 
-Fondamentale è la definizione di un \textit{Batch interval}, esso indica la durata secondo la quale uno Spark Streaming Job immagazzina dati e, per cui, in ogni intervallo ci sarà un DStream differente.
+Fondamentale è la definizione di un \textbf{Batch interval}, esso indica la durata secondo la quale uno Spark Streaming Job immagazzina dati e, per cui, in ogni intervallo ci sarà un DStream differente.
 Questo concetto fa capire la forte nota di Spark Streaming nel lavorare in micro batch e non in real time, questo è essezialmente per maggiori performance \footnote{\url{https://sqlstream.com/5-reasons-why-spark-streamings-batch-processing-of-data-streams-is-not-stream-processing/}}. %TODO
 
 Le \textbf{operazioni su un DStream}, molto simili a quelle su un RDD, funzioni proprie si possono applicare 
-solo attraverso quelle fornite dall'API, questo è limitante rispetto allo Structured Stream.
+solo attraverso quelle fornite dall'API, questo è limitante rispetto allo Structured Streaming \ref{sec:structuredstreaming}.
 
-Per usare Spark Streaming è necessario definire uno \textit{SparkStreamingContext}, per il quale bisogna definire uno \textit{StreamingContext} e un \textit{BatchInterval}.
+\par Per usare Spark Streaming è necessario definire uno \textbf{SparkStreamingContext} (specializzazione dello StramingContext per questo modulo), per il quale bisogna definire uno \textit{StreamingContext} e un \textit{BatchInterval}.
 Attraverso dei metodi preposti in questa struttura verranno consumati dati e creati di conseguenza i relativi DStream.
 
-A volte non basta considerare un intervallo, ma è più opportuno considerare una finestra, per cui si passa da una transformazione Stateless in cui vengono scartati da batch precedenti) a una trasformazione Stateful. In particolare con lo \textbf{sliding windows} vengono aggregati DStream appartanenti a intervalli diversi.
+\par A volte non basta considerare un intervallo, ma è più opportuno considerare una finestra, per cui si passa da una transformazione \textit{stateless} in cui vengono scartati dati provenienti da batch precedenti) a una trasformazione \textit{stateful}. In particolare, con lo \textbf{sliding windows} vengono aggregati DStream appartanenti a intervalli diversi.
 Ci sono due ulteriori parametri, oltre al batch interval, da tarare:
 \begin{itemize}
-	\item \textbf{window size}: multiplo di batch interval, indica l'ampiezza temporale della finestra
+	\item \textbf{window size}: multiplo di batch interval, indica l'ampiezza temporale della finestra;
 	\item \textbf{slide window dimension}: indica quanta distanza temporale c'è tra una window e la successiva, anche esso è multiplo del batch interval e potenzialmente potrebbero esserci finestre sovrapposte.
 \end{itemize}
+Un'esempio grafico di quello che accade con questo genere di trasformazioni è mostrato in Figura \ref{fig:StructuredStreaming}.
 \begin{figure}
 	\centering 
 	\includegraphics[width=0.8\linewidth]{img/sparkStreaming.png}
 	\caption{Funzionalità di Spark Streaming. Immagine tratta da \cite{spark}}
 	\label{fig:SparkStreaming}
 \end{figure}
+\begin{figure}
+	\centering 
+	\includegraphics[width=1\linewidth]{img/sparkStreamingBatch.png}
+	\caption{Divisione micro-batch in Spark Streaming. Immagine tratta da \cite{spark}}
+	\label{fig:SparkStreamingBatch}
+\end{figure}
+\begin{figure}
+	\centering 
+	\includegraphics[width=0.8\linewidth]{img/sparkStreamingWindow.png}
+	\caption{Divisione dei DStream in finestre temporali. Immagine tratta da \cite{spark}}
+	\label{fig:SparkStreamingWindow}
+\end{figure}
 \par Una nota di rilevanza fondamentale nello streaming, non supportata da questo modulo è che: esso non riesce a lavorare con il tempo dell'evento, ma solo con l'evento di Spark.
 
-\par Con Spark Streaming, non ci sono restrizioni per utilizzare qualsiasi tipo di sink (``\texttt{foreachRDD}"). %TODO
+\par Con Spark Streaming, non ci sono restrizioni per utilizzare qualsiasi tipo di sink, ovvero fonti esterne su dove esportare il risultato di operazioni di aggregazioni sui dati provenienti dagli Stream. Infatti, attraverso il metodo``\texttt{foreachRDD}" è possibile accedere ai dati del DStream e farci essenzialmente qualsiasi cosa. 
 
-\par La novità e il maggior supporto sembra sia in Spark Structured Streaming.
+\par In \texttt{src/main/scala/SparkStreaming.scala} è presente un esempio di utilizzo del modulo, nel quale vengono creati dei Receiver di stream di dati infiniti e vengono effettuate operazioni di vario genere per capire fino a che punto ci si può spingere con questo modulo e cosa offre. I limiti riscontrati in confronto con il nuovo modulo Structured Streming \ref{sec:structuredstreaming}, sono notevoli e verranno discussi nella seguente sezione. %TODO
+Per la gestione degli errori con questo modulo è necessario replicare i dati in altri supporti (es. Kafka).
+Inoltre si sono cercate le differenze di questo modulo rispetto ad altri pacchetti Apache per la sola gestione dello streaming. Nello specifico:
+\begin{itemize}
+	\item \textbf{Apache Storm}\footnote{\url{https://www.slideshare.net/ptgoetz/apache-storm-vs-spark-streaming}} \footnote{\url{https://www.educba.com/apache-storm-vs-apache-spark/}}: si tratta di un framework che processa nativamente stream di dati, con un modulo che ofre anche la possibilità di lavorare in micro-batch (\textit{Trident}). Spark è totalmente differente, è un framework per processare batch di dati e aggiuntivamente con il modulo SparkStreaming lavora su stream di dati in micro-batch. Per cui il confronto tra i due mondi e poco applicabile, infatti a tutto ciò si inserisce il fatto che non esistono benchmark e configurazioni pubbliche di Spark e il paper relativo a SparkStreaming\cite{sparkStreaming} risulta antecedente di due anni rispetto allo sviluppo di Trident. Ci sono nette differenze tra Trident e SparkStreaming soprattutto nella gestione più occurata delle failure da parte di Trident, in termini di performance si dimostra che SparkStreaming sia 40x volte più veloce.
+	Storm, inoltre, risulta più difficile da apprendere da utilizzare e comprendere rispetto a Spark e l'ecosistema che offre Spark spesso viene preso in considerazione per avere una visone completa del contesto dei dati e non solo dello streaming.
+	\item 
+	In ogni caso Spark non può essere considerata un'architettura Lambda, non c'è un supporto a qualsiasi cosa.... %TODO 
+\end{itemize}
+
+\par In ogni caso, la tendenza, la novità e il maggior supporto sembra sia nel modulo ``\textit{Spark Structured Streaming}", il quale verrà discusso di seguito.
+Nonostante ciò sembra continui ad esserci dell'interesse per questo modulo, magari per dati senza una struttura ben delienata. Un esempio dei giorni d'oggi è l'uso di questo framework applicato al 5G \footnote{\url{https://www.ericsson.com/en/blog/2019/6/applying-the-spark-streaming-framework-to-5g}}.
 \subsubsection{Spark Structured Streaming}\label{sec:structuredstreaming}
 Streaming strutturato, costruito sopra a Spark SQL e dunque con supporto a DataFrame e DataSet. 
 Sostanzialmente è possibile riuso totale del codice scritto per interrogazioni statiche su SparkSQL.
@@ -349,7 +374,7 @@ Sostanzialmente è possibile riuso totale del codice scritto per interrogazioni 
 Non c'è il concetto di batch di Spark Streaming, assomiglia più a uno stream Real Time.
 In ogni caso sotto si procede micro batch, dalla versione 2.3 di spark è stato aggiunto il concetto di \textit{Continuous Processing} che ha ridotto ulteriormente la latenza.
 
-I dati, come mostrato in Figura \ref{fig:StructuredStreaming}, vengono aggiunti a una tabella potenzialemente infinita, composta da una sola colonna 'value' (DataSet<Row>), 
+I dati, come mostrato in Figura \ref{fig:StructuredStreaming}, vengono aggiunti a una tabella potenzialemente infinita, composta da una sola colonna 'value' (DataSet<Row>) %TODO, 
 la quale tramite le funzionalità di SparkSQL verrà trasformata nelle colonne opportune.
 
 Per connettersi alle risorse dati bisogna:
