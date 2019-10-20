@@ -14,6 +14,7 @@
 \usepackage{titlesec}
 \usepackage{listings}
 \lstloadlanguages{Scala}
+\usepackage[htt]{hyphenat}
 \newcommand{\sectionbreak}{\clearpage}
 \usepackage[
 backend=biber,
@@ -304,9 +305,9 @@ Operazioni con cui interrogare il Dataset.
 \par Nota interessante, in Scala, DataFrame è così definito ``type DataFrame = Dataset[Row]" \footnote{\url{https://spark.apache.org/docs/2.4.4/api/scala/index.html}}.
 \par Un Dataset si può creare anche ``on the fly" da un file di testo o appartenere a determinati formati (es. Hadoop HDFS) o trasformando altri Dataset.
 Nelle interrogazioni che lo richiedono vengono passate funzioni, per cui possono entrare in gioco aspetti di PPS, i quali verranno meglio sviscerati nella sezione sullo Streaming Strutturato \ref{sec:structuredstreaming}.%TODO va bene
-\par Nell'esempio \texttt{src/main/scala/QuickStartSparkSQL.scala} viene mostrato come l'utilizzo di queste API renda maggiormente fluente le interrogazioni su un container docker (\texttt{src/main/docker}) con dati in HDFS in formato \textit{csv}.
+\par Nell'esempio \texttt{src/main/scala/QuickStartSparkSQL.scala} viene mostrato come l'utilizzo di queste API renda maggiormente fluente le interrogazioni su un container docker (\texttt{src/main/docker/basic-container}) con dati in HDFS in formato \textit{csv}.
 \newline 
-Le stesse interrogazioni, senza il supporto dell'API SparkSQL, ma del solo SparkCore, sono sicuramente meno leggibili e, come mostrato nell'esempio \texttt{QuickStartBasic.scala}, portano a dover gestire problematiche di basso livello sia a livello di interrogazioni che di parsing dei file. Queste problematiche (a questo livello) non dovrebbero interessare il programmatore, vengono efficientemente superate e gestite dal modulo SparkSQL.
+Le stesse interrogazioni, senza il supporto dell'API SparkSQL, ma del solo SparkCore, sono sicuramente meno leggibili e, come mostrato nell'esempio \texttt{src/main/scala/QuickStartBasic.scala}, portano a dover gestire problematiche di basso livello sia a livello di interrogazioni che di parsing dei file. Queste problematiche (a questo livello) non dovrebbero interessare il programmatore, vengono efficientemente superate e gestite dal modulo SparkSQL.
 
 \subsection{Moduli per lavorare con stream di dati}
 Ai nostri giorni è molto importante considerare dati provenienti da stream real time, di varia natura. Questo aspetto sta sempre più diventando una sfida complessa che si associa in modo naturale ai \textit{Big Data} e alla sempre più fondamentale necessità di trarre informazioni dai dati e utilizzarli per prendere decisioni importanti dal punto di vista aziendale. \newline
@@ -358,7 +359,7 @@ Un'esempio grafico di quello che accade con questo genere di trasformazioni è m
 \par Con Spark Streaming, non ci sono restrizioni per utilizzare qualsiasi tipo di sink, ovvero fonti esterne su dove esportare il risultato di operazioni di aggregazioni sui dati provenienti dagli Stream. Infatti, attraverso il metodo``\texttt{foreachRDD}" è possibile accedere ai dati del DStream e farci essenzialmente qualsiasi cosa. 
 
 %TODO usa hdfs nell'esempio
-\par In \texttt{src/main/scala/SparkStreaming.scala} è presente un esempio di utilizzo del modulo, nel quale vengono creati dei Receiver di stream di dati infiniti e vengono effettuate operazioni di vario genere per capire fino a che punto ci si può spingere con questo modulo e cosa offre. I limiti riscontrati in confronto con il nuovo modulo Structured Streming \ref{sec:structuredstreaming}, sono notevoli e verranno discussi nella seguente sezione. %TODO
+\par In \texttt{src/main/scala/streaming/SparkStreaming.scala} è presente un esempio di utilizzo del modulo, nel quale vengono creati dei Receiver di stream di dati infiniti e vengono effettuate operazioni di vario genere per capire fino a che punto ci si può spingere con questo modulo e cosa offre. I limiti riscontrati in confronto con il nuovo modulo Structured Streming \ref{sec:structuredstreaming}, sono notevoli e verranno discussi nella seguente sezione. %TODO
 Per la gestione degli errori con questo modulo è necessario replicare i dati in altri supporti (es. Kafka).
 \par Si è cercato di comprendere le differenze di questo modulo rispetto ad altri framework e librerie per la gestione dello streaming \footnote{\url{https://medium.com/@chandanbaranwal/spark-streaming-vs-flink-vs-storm-vs-kafka-streams-vs-samza-choose-your-stream-processing-91ea3f04675b}}. Nello specifico:
 \begin{itemize}
