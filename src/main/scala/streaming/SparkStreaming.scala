@@ -6,17 +6,16 @@ launch notes:
 */
 package streaming
 
-import scala.util.Random
-
 object SparkStreaming {
 
   import org.apache.spark.SparkConf
   import org.apache.spark.streaming.{Seconds, StreamingContext}
   import org.apache.spark.storage.StorageLevel
   import org.apache.spark.streaming.receiver.Receiver
+  import scala.util.Random
 
   def main ( args: Array[String] ): Unit = {
-    val sc = new SparkConf ().setAppName ( "Spark streaming example" ).setMaster ( "local[4]" )
+    val sc = new SparkConf ().setAppName ( "Spark streaming example" ).setMaster ( "local[*]" )
     val batchInterval = Seconds ( 5 )
     val threshold3 = 100
     val ssc = new StreamingContext ( sc, batchInterval )
@@ -24,7 +23,7 @@ object SparkStreaming {
     import org.apache.spark.storage.StorageLevel._
 
     //val nc1 = ssc.socketTextStream("localhost", 9960) //started with nc -l -p 9960 localhost
-    val hdfs1 = ssc.textFileStream("hdfs://stream:9999/*.csv")
+    val hdfs1 = ssc.textFileStream("hdfs://stream:9999/")
     val s1 = ssc.receiverStream ( new InfiniteStreamReceiver ( "a", Stream.from ( 100 ), 500, storageLevel = MEMORY_ONLY ) )
     val s2 = ssc.receiverStream ( new InfiniteStreamReceiver ( "b", Stream.from ( 100 ), 200, storageLevel = MEMORY_ONLY ) )
     val s3 = ssc.receiverStream ( new InfiniteStreamReceiver ( "c", Stream.from ( 300 ), 300, storageLevel = MEMORY_ONLY ) )
