@@ -3,7 +3,7 @@
 \setlength{\parskip}{5pt}
 \usepackage[utf8]{inputenc} 
 \usepackage[italian]{babel}
-\usepackage{hyperref}
+\PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
 \usepackage{float}
 \usepackage{times}
 \usepackage{titling}
@@ -309,6 +309,8 @@ Nelle interrogazioni che lo richiedono vengono passate funzioni, per cui possono
 Le stesse interrogazioni, senza il supporto dell'API SparkSQL, ma del solo SparkCore, sono sicuramente meno leggibili e, come mostrato nell'esempio \texttt{QuickStartBasic.scala}, portano a dover gestire problematiche di basso livello sia a livello di interrogazioni che di parsing dei file. Queste problematiche (a questo livello) non dovrebbero interessare il programmatore, vengono efficientemente superate e gestite dal modulo SparkSQL.
 
 \subsection{Moduli per lavorare con stream di dati}
+Ai nostri giorni è molto importante considerare dati provenienti da stream real time, di varia natura. Questo aspetto sta sempre più diventando una sfida complessa che si associa in modo naturale ai \textit{Big Data} e alla sempre più fondamentale necessità di trarre informazioni dai dati e utilizzarli per prendere decisioni importanti dal punto di vista aziendale. \newline
+Spark si avvicina a questo mondo con due moduli: \textbf{Spark Streaming} e \textbf{Spark Structured Streaming}. I quali verranno descritti e analizzati nelle seguenti sezioni.
 \subsubsection{Spark Streaming}
 Spark Streaming, come mostrato in Figura \ref{fig:SparkStreaming}, raccoglie dati provenienti da varie fonti (es. Kafka, Flume, Kinesis o TCP sockets, file) e li processa usando algoritmi complessi espressi attravervo funzioni high-level come \textit{map}, \textit{reduce}, \textit{join} e \textit{window}. Infine, il risultato prodotto può essere inserito in File Systems (HDFS), Databases o Dashboard da eventualemente elaborare con le funzioni di Spark ML e Graph.
 
@@ -317,7 +319,7 @@ Spark Streaming, come mostrato in Figura \ref{fig:SparkStreaming}, raccoglie dat
 La lettura di uno streaming avviene tramite un \textbf{Receiver} ed eredita dall'astrazione \textbf{DStream}, si tratta di dati che provengono da varie fonti (es. Kafka, Flume, and Kinesis) o da operazione ad alto livello su altri DStream.
 Un DStream può essere considerato come una sequenza di RDDs.
 
-Fondamentale è la definizione di un \textbf{Batch interval}, esso indica la durata secondo la quale uno Spark Streaming Job immagazzina dati e, per cui, in ogni intervallo ci sarà un DStream differente.
+Fondamentale è la definizione di un \textbf{batch interval}, esso indica la durata secondo la quale uno Spark Streaming Job immagazzina dati e, per cui, in ogni intervallo ci sarà un DStream differente.
 Questo concetto fa capire la forte nota di Spark Streaming nel lavorare in micro batch e non in real time, questo è essezialmente per maggiori performance \footnote{\url{https://sqlstream.com/5-reasons-why-spark-streamings-batch-processing-of-data-streams-is-not-stream-processing/}}. %TODO
 
 Le \textbf{operazioni su un DStream}, molto simili a quelle su un RDD, funzioni proprie si possono applicare 
@@ -355,18 +357,27 @@ Un'esempio grafico di quello che accade con questo genere di trasformazioni è m
 
 \par Con Spark Streaming, non ci sono restrizioni per utilizzare qualsiasi tipo di sink, ovvero fonti esterne su dove esportare il risultato di operazioni di aggregazioni sui dati provenienti dagli Stream. Infatti, attraverso il metodo``\texttt{foreachRDD}" è possibile accedere ai dati del DStream e farci essenzialmente qualsiasi cosa. 
 
+%TODO usa hdfs nell'esempio
 \par In \texttt{src/main/scala/SparkStreaming.scala} è presente un esempio di utilizzo del modulo, nel quale vengono creati dei Receiver di stream di dati infiniti e vengono effettuate operazioni di vario genere per capire fino a che punto ci si può spingere con questo modulo e cosa offre. I limiti riscontrati in confronto con il nuovo modulo Structured Streming \ref{sec:structuredstreaming}, sono notevoli e verranno discussi nella seguente sezione. %TODO
 Per la gestione degli errori con questo modulo è necessario replicare i dati in altri supporti (es. Kafka).
-Inoltre si sono cercate le differenze di questo modulo rispetto ad altri pacchetti Apache per la sola gestione dello streaming. Nello specifico:
+\par Si è cercato di comprendere le differenze di questo modulo rispetto ad altri framework e librerie per la gestione dello streaming \footnote{\url{https://medium.com/@chandanbaranwal/spark-streaming-vs-flink-vs-storm-vs-kafka-streams-vs-samza-choose-your-stream-processing-91ea3f04675b}}. Nello specifico:
 \begin{itemize}
-	\item \textbf{Apache Storm}\footnote{\url{https://www.slideshare.net/ptgoetz/apache-storm-vs-spark-streaming}} \footnote{\url{https://www.educba.com/apache-storm-vs-apache-spark/}}: si tratta di un framework che processa nativamente stream di dati, con un modulo che ofre anche la possibilità di lavorare in micro-batch (\textit{Trident}). Spark è totalmente differente, è un framework per processare batch di dati e aggiuntivamente con il modulo SparkStreaming lavora su stream di dati in micro-batch. Per cui il confronto tra i due mondi e poco applicabile, infatti a tutto ciò si inserisce il fatto che non esistono benchmark e configurazioni pubbliche di Spark e il paper relativo a SparkStreaming\cite{sparkStreaming} risulta antecedente di due anni rispetto allo sviluppo di Trident. Ci sono nette differenze tra Trident e SparkStreaming soprattutto nella gestione più occurata delle failure da parte di Trident, in termini di performance si dimostra che SparkStreaming sia 40x volte più veloce.
-	Storm, inoltre, risulta più difficile da apprendere da utilizzare e comprendere rispetto a Spark e l'ecosistema che offre Spark spesso viene preso in considerazione per avere una visone completa del contesto dei dati e non solo dello streaming.
-	\item 
-	In ogni caso Spark non può essere considerata un'architettura Lambda, non c'è un supporto a qualsiasi cosa.... %TODO 
+	\item \textbf{Apache Storm}\footnote{\url{https://www.slideshare.net/ptgoetz/apache-storm-vs-spark-streaming}} \footnote{\url{https://www.educba.com/apache-storm-vs-apache-spark/}}: si tratta di un framework che processa nativamente stream di dati, con un modulo che ofre anche la possibilità di lavorare in micro-batch (\textit{Trident}). Spark è totalmente differente, è un framework per processare batch di dati e aggiuntivamente con il modulo SparkStreaming lavora su stream di dati in micro-batch. Per cui il confronto tra i due mondi è poco applicabile, infatti a tutto ciò si inserisce il fatto che non esistono benchmark e configurazioni pubbliche di Spark e il paper relativo a SparkStreaming\cite{sparkStreaming} risulta antecedente di due anni rispetto allo sviluppo di Trident. Ci sono nette differenze tra Trident e SparkStreaming soprattutto nella gestione più occurata delle failure da parte di Trident, in termini di performance si dimostra che SparkStreaming sia 40x volte più veloce.
+	Storm, inoltre, risulta più difficile da apprendere, da utilizzare e comprendere rispetto a Spark, inoltre, l'ecosistema che offre Spark spesso viene preso in considerazione per avere una visone completa del contesto dei dati e non solo dello streaming.
+	\item \textbf{Flink}: nativamente per lo streaming (similmente a Storm) ma con supporto anche a dati batch, molto simile a Spark. Infatti, sembra ci sia proprio una lotta per il primato con Spark nella quale Flink sembra superarlo, ma quest' ultimo sta recuperando punti con il modulo di Structured Streaming.
+	\item \textbf{KafkaStream}: libreria \textit{light-weight} che può essere utilizzata in un'architettura a micro servizi. Facile da capire e da usare, con il vincolo di avere \textit{Kafka}. 
+	\item \textbf{Samza}: simile a \textit{KafkaStream}, sviluppata dagli stessi sviluppatori. Samza è una specie di versione ridimensionata di Kafka Streams. Mentre Kafka Streams è una libreria destinata ai microservizi, Samza è un'elaborazione cluster completa che gira su Yarn.
 \end{itemize}
-
-\par In ogni caso, la tendenza, la novità e il maggior supporto sembra sia nel modulo ``\textit{Spark Structured Streaming}", il quale verrà discusso di seguito.
+Tirando le somme, la scelta della soluzione di streaming da utilizzare dipende dai casi. Nel caso di IoT, sistemi nativamente stream, come Kafka e Storm, sono altamente consigliati. Considerando cambiamenti a lungo termine potrebbe essere opportuno appoggiarsi su framework più completi, come Flink e Spark. Così come avere già altri parti di sistemi su Spark (o Flink) porta naturalmente ad usare i moduli offerti dal framework che già si sta utilizzando.
+Inoltre, bisogna anche capire la garanzia dal punto di vista di aggiornamenti che vengono offerti, per questo punto Spark sembra sia molto attivo.
+Con gli anni come qualsiasi ambito informatico le cose potrebbero cambiare, si stanno sviluppando tante altre soluzione proprietarie e non, come rispettivamente \textit{Google Dataflow} \footnote{\url{https://cloud.google.com/dataflow/}} e \textit{Apache Apex} \footnote{\url{https://apex.apache.org}}.
+%TODO Lambda architecture
+\par In ogni caso nel mondo Spark, la tendenza, la novità e il maggior supporto sembra sia nel modulo ``\textit{Spark Structured Streaming}", il quale verrà discusso di seguito.
 Nonostante ciò sembra continui ad esserci dell'interesse per questo modulo, magari per dati senza una struttura ben delienata. Un esempio dei giorni d'oggi è l'uso di questo framework applicato al 5G \footnote{\url{https://www.ericsson.com/en/blog/2019/6/applying-the-spark-streaming-framework-to-5g}}.
+
+%TODO 
+
+%TODO https://medium.com/@kevin_hartman/spark-streaming-transformations-a-deep-dive-b82787e53288
 \subsubsection{Spark Structured Streaming}\label{sec:structuredstreaming}
 Streaming strutturato, costruito sopra a Spark SQL e dunque con supporto a DataFrame e DataSet. 
 Sostanzialmente è possibile riuso totale del codice scritto per interrogazioni statiche su SparkSQL.
