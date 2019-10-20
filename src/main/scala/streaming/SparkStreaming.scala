@@ -1,5 +1,10 @@
-import org.apache.spark.storage.StorageLevel
-import org.apache.spark.streaming.receiver.Receiver
+/*
+launch notes:
+- add '127.0.0.1   localhost stream' in etc/hosts
+- docker build -t container-name . (from docker/stream-container folder)
+- docker run -ti --hostname stream -p 50070:50070 -p 9999:9999 -p 50075:50075 -p 50010:50010 container-name
+*/
+package streaming
 
 import scala.util.Random
 
@@ -7,6 +12,8 @@ object SparkStreaming {
 
   import org.apache.spark.SparkConf
   import org.apache.spark.streaming.{Seconds, StreamingContext}
+  import org.apache.spark.storage.StorageLevel
+  import org.apache.spark.streaming.receiver.Receiver
 
   def main ( args: Array[String] ): Unit = {
     val sc = new SparkConf ().setAppName ( "Spark streaming example" ).setMaster ( "local[4]" )

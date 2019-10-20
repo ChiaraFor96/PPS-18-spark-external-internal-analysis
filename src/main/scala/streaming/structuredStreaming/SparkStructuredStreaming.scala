@@ -1,21 +1,21 @@
 /*
 launch notes:
 - add '127.0.0.1   localhost stream' in etc/hosts
-- docker build -t container-name . (from docker/strem folder)
+- docker build -t container-name . (from docker/stream-container folder)
 - docker run -ti --hostname stream -p 50070:50070 -p 9999:9999 -p 50075:50075 -p 50010:50010 container-name
 */
-package structuredStreaming
+package streaming.structuredStreaming
 
 object SparkStructuredStreaming {
   def main ( args: Array[String] ): Unit = {
     import StreamingDataOrganizerUtils._
     import StreamingDataOrganizerUtils.structuredManipulationUtilities.ColumnOperations._
-    import structuredStreaming.StreamingDataOrganizerUtils.structuredManipulationUtilities.StreamRecord
+    import streaming.structuredStreaming.StreamingDataOrganizerUtils.structuredManipulationUtilities.StreamRecord
     import org.apache.spark.sql.Dataset
     import org.apache.spark.sql.functions._
     import org.apache.spark.sql.streaming.Trigger
     import org.apache.spark.sql.types.{StructType, DataTypes}
-    import structuredStreaming.StreamingDataOrganizerUtils.CalendarInterval._
+    import streaming.structuredStreaming.StreamingDataOrganizerUtils.CalendarInterval._
     import spark.implicits._
 
     val datasets: Seq[Dataset[StreamRecord]] = Seq ( getRateDataset ( 10 ),

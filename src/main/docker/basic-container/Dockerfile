@@ -22,7 +22,7 @@ RUN \
   cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
   chmod 0600 ~/.ssh/authorized_keys
 
-ADD configs/*xml $HADOOP_HOME/etc/hadoop/
+ADD configs $HADOOP_HOME/etc/hadoop/
 
 ADD configs/ssh_config /root/.ssh/config
 
