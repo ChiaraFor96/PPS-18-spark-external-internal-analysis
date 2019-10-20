@@ -1,7 +1,7 @@
 /*
 launch notes:
 - add '127.0.0.1   localhost   hadoop' in etc/hosts
-- docker build -t container-name . (from docker/ folder)
+- docker build -t container-name . (from docker/basic-container folder)
 - docker run -ti --hostname hadoop -p 50070:50070 -p 9000:9000 -p 50075:50075 -p 50010:50010 container-name
 */
 object QuickStartSparkSQL {

@@ -1,4 +1,4 @@
-package structuredStreaming
+package streaming.structuredStreaming
 
 import org.apache.spark.sql.DataFrame
 
