@@ -7,13 +7,13 @@ launch notes:
 object QuickStartSparkSQL {
 
   import org.apache.spark.sql.functions._
-  import org.apache.spark.sql.{Column, DataFrame, SQLContext, SparkSession}
+  import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 
   def main ( args: Array[String] ): Unit = {
     val sc = SparkSession.builder ().appName ( "Quick start SparkSQL" )
       .master ( "local[*]" )
       .config ( "spark.hadoop.dfs.client.use.datanode.hostname", "true" )
-      .getOrCreate ().sqlContext
+      .getOrCreate
 
     sc.sparkContext.setLogLevel ( "ERROR" )
 
@@ -30,7 +30,7 @@ object QuickStartSparkSQL {
     sc.sparkContext.stop
   }
 
-  private def threeMoviesWithMostTags ( sc: SQLContext, movies: DataFrame ): Unit = {
+  private def threeMoviesWithMostTags ( sc: SparkSession, movies: DataFrame ): Unit = {
     val threeMoviesWithMostTags = loadDF ( sc, MoviesTest.tagsSource )
       .groupBy ( MoviesTest.movieId ).count.sort ( desc ( "count" ) ).limit ( 3 )
       .join ( movies, MoviesTest.movieId ).select ( MoviesTest.title, "count" )
@@ -74,7 +74,7 @@ object QuickStartSparkSQL {
     println ( s"There are: ${movies.count} movies" )
   }
 
-  private def loadDF ( sqlContext: SQLContext, filePath: String ): DataFrame = sqlContext.read
+  private def loadDF ( sparkSession: SparkSession, filePath: String ): DataFrame = sparkSession.read
     .options ( Map ( "header" -> "true", "inferSchema" -> "true" ) ) //other options like: mode, timeStampFormat, nullValue
     .csv ( filePath ) //or more generally use .format("csv").load(filePath)
 }
