@@ -58,7 +58,7 @@ Nell'archittetura Spark, spesso si ragiona come mostrato in Figura \ref{fig:Spar
 Essi offrono API, DLS e algoritmi in più linguaggi e dipendono direttamente dalla base, ovvero SparkCore. Verranno approfonditi più avanti.
 \begin{figure}[H]
 	\centering 
-	\includegraphics[width=0.8\linewidth]{img/sparkModules.png}
+	\includegraphics[width=1\linewidth]{img/sparkModules.png}
 	\caption{Archiettura di Spark. Immagine tratta da \url{https://docs.incorta.com/}.}
 	\label{fig:SparkModules}
 \end{figure}
@@ -134,7 +134,7 @@ Essendo l'architettura interni di Spark molto grande, ci si concentrerà sulle p
 Queste modalità ci aprono al concetto di \textit{master-worker} (PCD) che nel ``dialetto di Spark" è noto come \textbf{``driver-executor"}.
 \begin{figure}[H]
 	\centering 
-	\includegraphics[width=0.8\linewidth]{img/cluster-overview.png}
+	\includegraphics[width=1\linewidth]{img/cluster-overview.png}
 	\caption{Driver-executor in relazione a Cluster Manager. Immagine tratta da \cite{spark}.}
 	\label{fig:driverexecutor}
 \end{figure}
@@ -155,7 +155,7 @@ Quando eseguo Spark lo stato dei processi è visibile in una pagina web che vien
 	\item\textbf{Apache YARN\footnote{\url{http://hadoop.apache.org/docs/stable/hadoop-yarn/hadoop-yarn-site/YARN.html}}}: il gestore delle risorse in Hadoop 2.
 	\item\textbf{Apache Mesos\footnote{\url{http://mesos.apache.org}}}: generale che può anche eseguire Hadoop MapReduce e le applicazioni di servizio.
 	\item\textbf{Kubernetes\footnote{\url{https://kubernetes.io}}}: un sistema open source per automatizzare la distribuzione, il ridimensionamento e la gestione di applicazioni containerizzate. Non ancora adatto per fasi di produzione.
-	\item\textbf{Standalone\footnote{\url{https://spark.apache.org/docs/latest/spark-standalone.html}}}: semplice, facile e veloce. Incluso in Spark, semplifica la configurazione di un cluster. Non ancora adatto per fasi di produzione. 
+	\item\textbf{Standalone\footnote{\url{https://spark.apache.org/docs/2.4.4/spark-standalone.html}}}: semplice, facile e veloce. Incluso in Spark, semplifica la configurazione di un cluster. Non ancora adatto per fasi di produzione. 
 \end{itemize}
 
 \subsection{RDDs  e tasks}
@@ -196,7 +196,7 @@ A fronte della chiamata di un'azione, il DAG creato viene inviato al DAG Schedul
 \par Un DAG consente all'utente di comprendere effettivamente cosa sta accadendo, anche in merito agli shuffle e gli stage.
 \begin{figure}[H]
 	\centering 
-	\includegraphics[width=0.6\linewidth]{img/DAG.png}
+	\includegraphics[width=0.8\linewidth]{img/DAG.png}
 	\caption{Esempio DAG di Spark. Immagine tratta da \url{https://databricks.com}.}
 	\label{fig:DAG}
 \end{figure}
@@ -250,6 +250,7 @@ Bisogna fissare questo numero nell'intervallo compreso tra:
 \end{itemize}
 Quindi analizzando Spark UI e dai DAG, si capisce cosa effettivamente sta succedendo nel Cluster e si comprende quale soluzione è la migliore. Non è detto che la soluzione migliore in termine di moviementi di dati, sia quella con un codice più compatto ed ``esteticamente" migliore.
 \section{Moduli di Spark}
+Bisogna sottolineare che le applicazioni \textit{Scala} dovrebbero definire un metodo \texttt{main()} anzichè estendere \texttt{scala.App}. Le sottoclassi di \texttt{scala.App} potrebbero non funzionare correttamente \cite{spark}.
 \subsection{Iniziare a lavorarare con Spark e gli RDDs}
 Gli RDD, introdotti nella sezione precendente, rappresentano la base di ciò che offre Spark con il modulo SparkCore. In questa sezione si parlerà degli aspetti esteriori di questo concetto e di come utilizzarli.
 \par Per passare funzioni a Spark nella documentazione viene mostrato come sfruttare map su un RDDs applicando una propria funzione che prende in input un dato dello stresso tipo di quello contenuto nel RDDs. Questo aspetto da un lato obbliga il programmatore ad appoggiarsi alle API fornite dal framework e quindi ottimizzate da Spark, dall'altro pone dei limiti nel come il programmatore vuole approcciarsi ai dati. Limiti che vengono ridotti dalla potenza e dalla facilità di comprensione del DLS che Spark mette a disposizione, soprattutto nel modulo SparkSQL.
@@ -295,7 +296,7 @@ Di seguito verranno analizzati gli aspetti più interessanti e pratici, di quest
 \par Dei benchmarks\footnote{\url{https://blog.knoldus.com/spark-rdd-vs-dataframes}} dimostrano che i DataFrame sono più ottimizzati in termini di elaborazione e forniscono più opzioni per aggregazioni e altre operazioni con una varietà di funzioni disponibili (molte più funzioni sono ora supportate nativamente in Spark 2.4).
 \subsubsection{Dataset API}
 Operazioni con cui interrogare il Dataset. 
-\par Nota interessante, in Scala, DataFrame è così definito ``type DataFrame = Dataset[Row]" \footnote{\url{https://spark.apache.org/docs/2.4.4/api/scala/index.html}}.
+\par Nota interessante, in Scala, DataFrame è così definito ``type DataFrame = Dataset[Row]" \cite{spark}.
 \par Un Dataset si può creare anche ``on the fly" da un file di testo o appartenere a determinati formati (es. Hadoop HDFS) o trasformando altri Dataset.
 Nelle interrogazioni che lo richiedono vengono passate funzioni, questi aspetti verranno meglio sviscerati nella sezione sullo Streaming Strutturato \ref{sec:structuredstreaming}.
 \par Nell'esempio \texttt{src/main/scala/QuickStartSparkSQL.scala} viene mostrato come l'utilizzo di queste API renda maggiormente fluente le interrogazioni su un container docker (\texttt{src/main/docker/basic-container}) con dati in HDFS in formato \textit{csv}.
@@ -309,7 +310,7 @@ Spark si avvicina a questo mondo con due moduli: \textbf{Spark Streaming} e \tex
 Spark Streaming, come mostrato in Figura \ref{fig:SparkStreaming}, raccoglie dati provenienti da varie fonti (es. Kafka, Flume, Kinesis o TCP sockets, file) e li processa usando algoritmi complessi espressi attraverso funzioni high-level come \textit{map}, \textit{reduce}, \textit{join} e \textit{window}. Infine, il risultato prodotto può essere inserito in File Systems (HDFS), Databases o Dashboard da eventualemente elaborare con le funzioni di Spark ML e Graph.
 \begin{figure}[H]
 	\centering 
-	\includegraphics[width=0.8\linewidth]{img/sparkStreaming.png}
+	\includegraphics[width=1\linewidth]{img/sparkStreaming.png}
 	\caption{Funzionalità di Spark Streaming. Immagine tratta da \cite{spark}.}
 	\label{fig:SparkStreaming}
 \end{figure}
@@ -341,7 +342,7 @@ Ci sono due ulteriori parametri, oltre al batch interval, da tarare:
 Un'esempio grafico di quello che accade con questo genere di trasformazioni è mostrato in Figura \ref{fig:StructuredStreaming}.
 \begin{figure}[H]
 	\centering 
-	\includegraphics[width=0.8\linewidth]{img/sparkStreamingWindow.png}
+	\includegraphics[width=1\linewidth]{img/sparkStreamingWindow.png}
 	\caption{Divisione dei DStream in finestre temporali. Immagine tratta da \cite{spark}.}
 	\label{fig:SparkStreamingWindow}
 \end{figure}
@@ -376,7 +377,7 @@ Nota interessante è nell'approcciarsi al CP, Spark ha usato una versione adatta
 É \textbf{importante} sottolineare che non viene materializzata l'intera tabella, man mano che vengono interrogati i dati vengono scartati. 
 \begin{figure}[H]
 	\centering 
-	\includegraphics[width=0.8\linewidth]{img/sparkStructuredStreaming.png}
+	\includegraphics[width=1\linewidth]{img/sparkStructuredStreaming.png}
 	\caption{Come Spark Structured Streaming mantiene i dati. Immagine tratta da \cite{structuredStreaming}.}
 	\label{fig:StructuredStreaming}
 \end{figure}
@@ -413,7 +414,7 @@ Le operazioni supportate nell'interrogazione ai dati che provengono dalla \textt
 	\item \textbf{window based sliding}, molto simile a quello supportato da SparkStreaming,
 	\item \textbf{UDF} \cite{internalsSQL} (\textit{user defined functions}): si tratta di normalissime funzioni Scala definite dall'utente, che si possono considerare come ``black box". Il tutto ha un senso unificato all'utilizzo di case class definite dall'utente rappresentative dei record appartenenti agli stream di dati.
 	Le UDF sono registrabili anche globalmente nella sessione.
-	Ma attenzione ad all'utilizzo di UDF, bisogna vedere i piani di esecuzione, valutari e comprendere se effettivamente, essendo scatole nere, ottimizzano l'esecuzione. O se essa può essere resa meno leggibile ma più performante, e comunque eseguibile, con i meccanismi offerti da Spark e dai suoi moduli. Inoltre, UDF ha problemi di seriazzazione, ogni volta deve deserializzare e serializzare le colonne, per cui quando possibile è consigliato preferire le funzioni builtin che in SparkSQL non sono poche \footnote{\url{https://spark.apache.org/docs/2.4.4/api/scala/index.html\#org.apache.spark.sql.functions}}. 
+	Ma attenzione ad all'utilizzo di UDF, bisogna vedere i piani di esecuzione, valutari e comprendere se effettivamente, essendo scatole nere, ottimizzano l'esecuzione. O se essa può essere resa meno leggibile ma più performante, e comunque eseguibile, con i meccanismi offerti da Spark e dai suoi moduli. Inoltre, UDF ha problemi di seriazzazione, ogni volta deve deserializzare e serializzare le colonne, per cui quando possibile è consigliato preferire le funzioni builtin che in SparkSQL non sono poche \cite{spark}. 
 	\item \textbf{UDAF} \cite{internalsSQL} (user-defined aggregate function) : si tratta di funzioni personalizzate che forniscono aggregazione, %TODO
 \end{itemize}
 Nell'abito delle \textbf{operazioni con stato arbitrarie}, le funzioni \texttt{mapGroupsWithState} e \texttt{flatMapGroupsWithState} permettono di usare le UDF su Dataset aggregati, per aggiornare lo stato definito dall'utente.
@@ -457,10 +458,30 @@ settare la policy nella configurazione (max o min).
 	\item supporto CP assente (sperimentale in questo modulo).
 \end{itemize}
 Inoltre, questo modulo, con il supporto di SparkSQL, può essere utilizzato in ambiti di \textit{Business Intelligence}, infatti è possibile dall'API ottenere una visione dai dati dal punto di vista di cubo multidimensionale ed è possibile svolgerci operazioni con molta naturalezza. In questo ambito, il modulo potrebbe essere usato anche per implementare ETL.
-\section{Limiti di Spark}
-%TODO Lambda architecture
-%TODO readme.md + main e non APP
-\footnote{\url{https://www.whizlabs.com/blog/apache-spark-limitations/}}
+\section{Considerazioni finali e limiti di Spark}
+\subsection{Spark è conforme alla Lambda Architecture?}
+\textit{Cos'è la Lambda Architecture\footnote{\url{http://lambda-architecture.net}}?} 
+
+\begin{quote}
+The Lambda Architecture provides a general-purpose approach to implementing an arbitrary function on an arbitrary dataset and having the function return its results with low latency. That doesn’t mean you’ll always use the exact same technologies every time you implement a data system. The specific technologies you use might change depending on your requirements. But the Lambda Architecture defines a consistent approach to choosing those technologies and to wiring them together to meet your requirements \cite{lambdaArchitecture}.
+\end{quote}
+Nel web Spark è definito come una soluzione semplice, elegante e sempre più popolare: lo stack Spark consente agli sviluppatori di implementare un sistema conforme a LA, utilizzando un ambiente di sviluppo e test unificato (scegli uno di Scala, Python, Java) supportando sia operazioni batch che streaming, su larga scala \footnote{\url{https://databricks.com/session/applying-the-lambda-architecture-with-spark}}.
+
+\subsection{Limiti e note finali su Spark}
+
+Dopo questa analisi abbastanza approfondita su cosa offre Spark e su come si sta sviluppando nel tempo, è bene evidenziare i limiti e le note a margine che esso pone \footnote{\url{https://www.whizlabs.com/blog/apache-spark-limitations/}}. 
+\begin{itemize}
+	\item \textbf{Nessun sistema di gestione dei file}: il sistema di gestione dei file non è offerto da Spark, è necessario fornirsene da fonti esterne (come Hadoop, che tra l'altro è sempre di Apache).
+	\item \textbf{Costi elevati}: per fare elaborazioni con Spark serve molta RAM, immagino sia una nota ovvia visto il contesto in cui si va ad operare.
+	\item \textbf{Latenza}: la latenza di Spark è alta, ma con il supporto al Continuos Procressing in Spark Structured Streaming (in fase sperimentale) si sta abbassando.
+	\item \textbf{Ridotto numero di algoritmi del modulo MLib}.
+	\item \textbf{Mancanza di criteri di window record-base}, per ora la window esiste solo a livello temporale.
+	\item \textbf{Gestione della back pressure}, ovvero accumulo di dati in ingresso/uscita mentre il buffer è troppo pieno: Spark non ha le capacità per farlo, deve essere fatto manualmente.
+	\item \textbf{Ottimizzazione manuale}: saper tarare i parametri è fondamentale (es. numero di partizioni di un RDD, durata di un watermark).
+\end{itemize}
+Nonostante queste limitazioni, Spark è tra i leader del mercato.
+%TODO readme.md
+
 \newpage
 \printbibliography
 \end{document}
