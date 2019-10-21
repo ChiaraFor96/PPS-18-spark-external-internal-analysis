@@ -32,7 +32,13 @@ object SparkStreaming {
     s1.window(Seconds(20)).join(s2.window(Seconds(30))).map(v => s"join ${v._1} - ${v._2}").print
     s3.window(Seconds(20), slideDuration = Seconds(10))
       .union(s2.window(Seconds(30), slideDuration = Seconds(10))).filter(_._1 % threshold3 > 1).map(_._2).reduce(_ + _).print
-    hdfs1.map ( x => s"hdfs: $x" ).print
+    hdfs1.map ( x => s"hdfs: $x" ).print //don' monitor directory
+    /*if I'll do what I do in structuredStreaming...
+     - join only with (K, V) DStream
+     - no join in specific value but in K
+     - no data source for PoC
+     - no write stream for standardize sinks
+     */
 
     //start context
     ssc.start
