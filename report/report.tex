@@ -14,7 +14,16 @@
 \usepackage{titlesec}
 \usepackage{listings}
 \lstloadlanguages{Scala}
-\usepackage[htt]{hyphenat}
+\renewcommand{\texttt}[1]{%
+	\begingroup
+	\ttfamily
+	\begingroup\lccode`~=`/\lowercase{\endgroup\def~}{/\discretionary{}{}{}}%
+	\begingroup\lccode`~=`[\lowercase{\endgroup\def~}{[\discretionary{}{}{}}%
+	\begingroup\lccode`~=`.\lowercase{\endgroup\def~}{.\discretionary{}{}{}}%
+	\catcode`/=\active\catcode`[=\active\catcode`.=\active
+	\scantokens{#1\noexpand}%
+	\endgroup
+}
 \newcommand{\sectionbreak}{\clearpage}
 \usepackage[
 backend=biber,
@@ -81,7 +90,7 @@ Utilizzarla con Spark è molto semplice:
 	\item decomprimere la cartella e posizionarsi all'interno di essa da terminale;
 	\item a questo punto, lanciando il comando \texttt{./bin/spark-shell} partirà la shell.
 \end{itemize}
-Si può anche memorizzare questo percorso nel path di sistema e accedervi da qualsiasi parte del file system. Aggiungendo a \texttt{{\raise.17ex\hbox{$\scriptstyle\sim$}}/.bashrc}:
+Si può anche memorizzare questo percorso nel path di sistema e accedervi da qualsiasi parte del file system. Aggiungendo a \texttt{$\sim$/.bashrc}: %TODO tilde
 \begin{itemize}
 	\item \texttt{export SPARK\_HOME="percorso della cartella decompressa"} 
 	\item \texttt{export PATH=$PATH:$SPARK\_HOME/bin:\$SPARK\_HOME/sbin}
@@ -114,13 +123,13 @@ Un SparkContext è essenzialmente un client dell'ambiente di esecuzione di Spark
 Per ciascuna JVM ci può essere al più uno \textit{SparkContext}.
 Per creare uno SparkContext potrebbe essere necessario fornire una configurazione che nel caso generale corrisponde a SparkConf, nel codice sottostante viene mostrato come creare uno SparkContext con una configuraione.
 
-\lstinputlisting[language=Scala, firstline=13, lastline=16]{../src/main/scala/QuickStartBasic.scala}
+\lstinputlisting[language=Scala, firstline=9, lastline=12,basicstyle=\small]{../src/main/scala/it/unibo/pps18/spark/QuickStartBasic.scala}
 La configuarazione imposta il nome dell'applicazione (\texttt{setAppName}) e il tipo di esecuzione con \texttt{setMaster} (di questo punto si discuterà in seguito). Queste due opzioni sono quelle necessarie da configurare, altre riguardano una principalemente la personalizzazione dell'ambiente di esecuzione (vedi documentazione). In particolare, in questo caso viene configurato per usare hdfs.
 Esistono altri costruttori per creare uno SparkContext. Quella con la SparkConf, a mio avviso, risultà più fluente delle altre modalità.
 \subsubsection{SparkSession}\label{sec:SparkSession} 
 SparkSession è il punto di accesso per lavorare con dati strutturati (API DataFrame e Dataset), in genere si opera attraverso un builder dal quale poi si ottiene l'istanza mediante \texttt{getOrCreate}. 
 Nell'esempio sottostante viene mostrato il suo utilizzo, è molto simile all'esempio dello SparkContext.
-\lstinputlisting[language=Scala, firstline=13, lastline=16]{../src/main/scala/QuickStartSparkSQL.scala}
+\lstinputlisting[language=Scala, firstline=9, lastline=12,basicstyle=\small]{../src/main/scala/it/unibo/pps18/spark/QuickStartSparkSQL.scala}
 
 Nota: esiste una vecchia versione dello SparkContext per il modulo dei dati strutturati chiamata \textit{SQLContext}, essa è stata lasciata per compatibilità ed è stata superata dalla SparkSession.
 \section{Internals}
@@ -256,7 +265,7 @@ Gli RDD, introdotti nella sezione precendente, rappresentano la base di ciò che
 \par Per passare funzioni a Spark nella documentazione viene mostrato come sfruttare map su un RDDs applicando una propria funzione che prende in input un dato dello stresso tipo di quello contenuto nel RDDs. Questo aspetto da un lato obbliga il programmatore ad appoggiarsi alle API fornite dal framework e quindi ottimizzate da Spark, dall'altro pone dei limiti nel come il programmatore vuole approcciarsi ai dati. Limiti che vengono ridotti dalla potenza e dalla facilità di comprensione del DLS che Spark mette a disposizione, soprattutto nel modulo SparkSQL.
 \par Per quanto riguarda il \textbf{caching}, oltre a \texttt{persist}, esistono modalità per specificare a quale memoria far riferimento e funziona anche su dati presenti in molti nodi.
 \par Se andassi ad applicare \texttt{collect()} su una grande quantità di dati potrei incorrere in un \textit{``out of memory"}, per cui bisogna applicare concetti simili a quelli visti durante il corso di PPS. Ad esempio anzichè fare una stampa di tutti i dati, si vanno recuperare i primi N record con una \texttt{take(N)}.
-\par Un esempio di utilizzo di SparkCore senza l'ausilio di ulteriori moduli è presente nella classe \texttt{src/main/scala/QuickStartSparkBasic.scala}, nel quale viene interrogato un container docker (\texttt{src/main/docker/basic-container})  con dati in HDFS in formato \textit{csv}. Nell'esempio vengono a galla i limiti che si incontrano nel caso in cui non si utilizzino altri moduli di supporto (questo punto verrà compreso meglio nella sezione su SparkSQL \ref{sec:SparkSQL}).
+\par Un esempio di utilizzo di SparkCore senza l'ausilio di ulteriori moduli è presente nella classe \texttt{/src/main/scala/it/unibo/pps18/spark/QuickStartSparkBasic.scala}, nel quale viene interrogato un container docker (\texttt{src/main/docker/basic-container})  con dati in HDFS in formato \textit{csv}. Nell'esempio vengono a galla i limiti che si incontrano nel caso in cui non si utilizzino altri moduli di supporto (questo punto verrà compreso meglio nella sezione su SparkSQL \ref{sec:SparkSQL}).
 \subsection{Machine Learning Library (MLlib)}
 Questo modulo consiste in:
 \begin{itemize}
@@ -299,9 +308,9 @@ Operazioni con cui interrogare il Dataset.
 \par Nota interessante, in Scala, DataFrame è così definito ``type DataFrame = Dataset[Row]" \cite{spark}.
 \par Un Dataset si può creare anche ``on the fly" da un file di testo o appartenere a determinati formati (es. Hadoop HDFS) o trasformando altri Dataset.
 Nelle interrogazioni che lo richiedono vengono passate funzioni, questi aspetti verranno meglio sviscerati nella sezione sullo Streaming Strutturato \ref{sec:structuredstreaming}.
-\par Nell'esempio \texttt{src/main/scala/QuickStartSparkSQL.scala} viene mostrato come l'utilizzo di queste API renda maggiormente fluente le interrogazioni su un container docker (\texttt{src/main/docker/basic-container}) con dati in HDFS in formato \textit{csv}.
+\par In \texttt{/src/main/scala/it/unibo/pps18/spark/QuickStartSparkSQL.scala} viene mostrato come l'utilizzo di queste API renda maggiormente fluente le interrogazioni su un container docker (\texttt{src/main/docker/basic-container}) con dati in HDFS in formato \textit{csv}.
 \newline 
-Le stesse interrogazioni, senza il supporto dell'API SparkSQL, ma del solo SparkCore, sono sicuramente meno leggibili e, come mostrato nell'esempio \texttt{src/main/scala/QuickStartBasic.scala}, portano a dover gestire problematiche di basso livello sia a livello di interrogazioni che di parsing dei file. Queste problematiche (a questo livello) non dovrebbero interessare il programmatore, vengono efficientemente superate e gestite dal modulo SparkSQL.
+Le stesse interrogazioni, senza il supporto dell'API SparkSQL, ma del solo SparkCore, sono sicuramente meno leggibili e, come mostrato nel corrispondente esempio di utilizzo presente in \texttt{/src/main/scala/it/unibo/pps18/spark/QuickStartBasic.scala}, portano a dover gestire problematiche di basso livello sia a livello di interrogazioni che di parsing dei file. Queste problematiche (a questo livello) non dovrebbero interessare il programmatore, vengono efficientemente superate e gestite dal modulo SparkSQL.
 
 \subsection{Moduli per lavorare con stream di dati}
 Ai nostri giorni è molto importante considerare dati provenienti da stream real time, di varia natura. Questo aspetto sta sempre più diventando una sfida complessa che si associa in modo naturale ai \textit{Big Data} e alla sempre più fondamentale necessità di trarre informazioni dai dati e utilizzarli per prendere decisioni importanti dal punto di vista aziendale. \newline
@@ -350,7 +359,7 @@ Un'esempio grafico di quello che accade con questo genere di trasformazioni è m
 \par Per la gestione degli errori con questo modulo è necessario replicare i dati in altri supporti (es. Kafka).
 \par Con Spark Streaming, non ci sono restrizioni per utilizzare qualsiasi tipo di sink, ovvero fonti esterne su dove esportare il risultato di operazioni di aggregazioni sui dati provenienti dagli Stream. Infatti, attraverso il metodo ``\texttt{foreachRDD}" è possibile accedere ai dati del DStream e farci essenzialmente qualsiasi cosa. 
 
-\par In \texttt{src/main/scala/it.unibo.pps18.spark.streaming/SparkStreaming.scala} è presente un esempio di utilizzo del modulo, nel quale vengono creati dei Receiver di stream di dati infiniti e vengono effettuate operazioni di vario genere per capire fino a che punto ci si può spingere con questo modulo e cosa offre. I limiti riscontrati in confronto con il nuovo modulo Structured Streming \ref{sec:structuredstreaming}, sono notevoli e verranno discussi nella seguente sezione.
+\par Un esempio di utilizzo del modulo è presente in \texttt{/src/main/scala/it/unibo/pps18/spark/streaming/SparkStreaming.scala}, nel quale vengono creati dei Receiver di stream di dati infiniti e vengono effettuate operazioni di vario genere per capire fino a che punto ci si può spingere con questo modulo e cosa offre. I limiti riscontrati in confronto con il nuovo modulo Structured Streming \ref{sec:structuredstreaming}, sono notevoli e verranno discussi nella seguente sezione.
 
 \par Inoltre, si è cercato di comprendere le differenze di questo modulo rispetto ad altri framework e librerie per la gestione dello it.unibo.pps18.spark.streaming \footnote{\url{https://medium.com/@chandanbaranwal/spark-it.unibo.pps18.spark.streaming-vs-flink-vs-storm-vs-kafka-streams-vs-samza-choose-your-stream-processing-91ea3f04675b}}. Nello specifico:
 \begin{itemize}
@@ -417,7 +426,7 @@ Le operazioni supportate nell'interrogazione ai dati che provengono dalla \textt
 	Ma attenzione ad all'utilizzo di UDF, bisogna vedere i piani di esecuzione, valutari e comprendere se effettivamente, essendo scatole nere, ottimizzano l'esecuzione. O se essa può essere resa meno leggibile ma più performante, e comunque eseguibile, con i meccanismi offerti da Spark e dai suoi moduli. Inoltre, UDF ha problemi di seriazzazione, ogni volta deve deserializzare e serializzare le colonne, per cui quando possibile è consigliato preferire le funzioni builtin che in SparkSQL non sono poche \cite{spark}. 
 	\item \textbf{UDAF} \cite{internalsSQL} (user-defined aggregate function) : si tratta di funzioni personalizzate che forniscono aggregazione, %TODO
 \end{itemize}
-Nell'abito delle \textbf{operazioni con stato arbitrarie}, le funzioni \texttt{mapGroupsWithState} e \texttt{flatMapGroupsWithState} permettono di usare le UDF su Dataset aggregati, per aggiornare lo stato definito dall'utente.
+Nell'abito delle \textbf{operazioni con stato arbitrarie}, esistono delle funzioni che permettono di usare le UDF su Dataset aggregati, per aggiornare lo stato definito dall'utente (\texttt{mapGroupsWithState} e \texttt{flatMapGroupsWithState}).
 
 \par Per l'essenza dello it.unibo.pps18.spark.streaming, in questo modulo non sono supportate alcune funzioni di SparkSQL \footnote{\url{https://spark.apache.org/docs/2.4.4/structured-it.unibo.pps18.spark.streaming-programming-guide.html\#unsupported-operations}}.
 
@@ -446,7 +455,7 @@ settare la policy nella configurazione (max o min).
 
 \par Se si volesse comprendere e monitorare il \textbf{piano di esecuzione delle query}, esistono delle API specifiche e il concetto di \texttt{StreamingQueryListener} \footnote{\url{https://www.slideshare.net/databricks/realtime-spark-from-interactive-queries-to-it.unibo.pps18.spark.streaming}}.
 
-\par Un esempio abbastanza completo di utilizzo di questo modulo è mostrato in \texttt{/src/main/scala/it.unibo.pps18.spark.streaming/structuredStreaming/SparkStructuredStreaming.scala}, nell'esempio vengono aggregati dati provenienti da fonti rate (fonte di dati simulata fornita dal modulo per fare Proof of Concepts) e da una fonte esterna (\texttt{src/main/docker/stream-container}), ovvero un hdfs su container docker . I dati vengono manipolati e si arriva fare un'aggregazione sia orizzontale, attraverso il tempo, che verticale, lavorando opportunamente sulle colonne. Per lavorare in modo più agevole, si è creato un oggetto di supporto a questo esempio presente in \texttt{/src/main/scala/it.unibo.pps18.spark.streaming/structuredStreaming/StreamingDataOrganizerUtils.scala}.
+\par Nell'esempio proposto in \texttt{/src/main/scala/it/unibo/pps18/spark/streaming/structuredStreaming/SparkStructuredStreaming.scala} viene mostrato un uso abbastanza completo di utilizzo di questo modulo, dove vengono aggregati dati provenienti da fonti rate (fonte di dati simulata fornita dal modulo per fare Proof of Concepts) e da una fonte esterna (\texttt{src/main/docker/stream-container}), ovvero un hdfs su container docker . I dati vengono manipolati e si arriva fare un'aggregazione sia orizzontale, attraverso il tempo, che verticale, lavorando opportunamente sulle colonne. Per lavorare in modo più agevole, si è creato un oggetto di supporto a questo esempio presente in \texttt{/src/main/scala/it/unibo/pps18/spark/streaming/structuredStreaming/StreamingDataOrganizerUtils.scala}.
 
 \par Dagli esempi e dall'approfondimento su questi moduli di it.unibo.pps18.spark.streaming, si può concludere che Spark Structured Streaming risulta un modulo in crescita, con supporto al programmatore e che risolve delle pecche presenti in Spark Streaming, come:
 \begin{itemize}
