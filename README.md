@@ -2,6 +2,7 @@
 Spark è un famoso framework Scala per big-data e cluster computing. In questo progetto si studieranno aspetti linguistici di questo framework, e la sua organizzazione interna -- l'obiettivo è porre le basi per futuri framework per computazione distribuita che si ispirino a Spark.
 
 Il progetto analizza __Spark 2.4.4__ in *Scala*.
+
 ##Struttura del progetto
 La relazione finale del progetto è nel file [`report.pdf`](report.pdf).
 
