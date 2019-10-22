@@ -1,9 +1,3 @@
-/*
-launch notes:
-- add '127.0.0.1   localhost stream' in etc/hosts
-- docker build -t container-name . (from docker/stream-container folder)
-- docker run -ti --hostname stream -p 50070:50070 -p 9999:9999 -p 50075:50075 -p 50010:50010 container-name
-*/
 package streaming.structuredStreaming
 
 object SparkStructuredStreaming {

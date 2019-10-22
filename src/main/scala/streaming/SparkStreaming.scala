@@ -1,9 +1,3 @@
-/*
-launch notes:
-- add '127.0.0.1   localhost stream' in etc/hosts
-- docker build -t container-name . (from docker/stream-container folder)
-- docker run -ti --hostname stream -p 50070:50070 -p 9999:9999 -p 50075:50075 -p 50010:50010 container-name
-*/
 package streaming
 
 object SparkStreaming {
@@ -32,13 +26,7 @@ object SparkStreaming {
     s1.window(Seconds(20)).join(s2.window(Seconds(30))).map(v => s"join ${v._1} - ${v._2}").print
     s3.window(Seconds(20), slideDuration = Seconds(10))
       .union(s2.window(Seconds(30), slideDuration = Seconds(10))).filter(_._1 % threshold3 > 1).map(_._2).reduce(_ + _).print
-    hdfs1.map ( x => s"hdfs: $x" ).print //don' monitor directory
-    /*if I'll do what I do in structuredStreaming...
-     - join only with (K, V) DStream
-     - no join in specific value but in K
-     - no data source for PoC
-     - no write stream for standardize sinks
-     */
+    hdfs1.map ( x => s"hdfs: $x" ).print //don' monitor directory :(
 
     //start context
     ssc.start
