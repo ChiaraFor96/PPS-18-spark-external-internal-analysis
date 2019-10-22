@@ -3,7 +3,7 @@ Spark è un famoso framework Scala per big-data e cluster computing. In questo p
 
 Il progetto analizza __Spark 2.4.4__ in *Scala*.
 
-##Struttura del progetto
+## Struttura del progetto
 La relazione finale del progetto è nel file [`report.pdf`](report.pdf).
 
 All'interno delle risorse del progetto ci sono:
