@@ -13,6 +13,7 @@ l'analisi svolta.
 Viene svolta in [`/src/main/scala/QuickStartBasic.scala`](/src/main/scala/QuickStartBasic.scala)
 e si basa sul rispettivo container _docker_ presente in
 [`/src/main/docker/basic-container`](/src/main/docker/basic-container).
+
 __Istruzioni di lancio__:
 - aggiungere la riga `127.0.0.1   localhost   hadoop` in `etc/hosts
 - spostarsi da terminale nella cartella [`/src/main/docker/basic-container`](/src/main/docker/basic-container)
@@ -26,6 +27,7 @@ __Istruzioni di lancio__:
 Viene svolta in [`/src/main/scala/QuickStartSparkSQL.scala`](/src/main/scala/QuickStartSparkSQL.scala) 
 e si basa sul rispettivo container _docker_ presente in
 [`/src/main/docker/basic-container`](/src/main/docker/basic-container).
+
 __Istruzioni di lancio__:
 - aggiungere la riga `127.0.0.1   localhost   hadoop` in `etc/hosts`
 - spostarsi da terminale nella cartella [`/src/main/docker/basic-container`](/src/main/docker/basic-container)
@@ -40,6 +42,7 @@ __Istruzioni di lancio__:
 Analisi svolta in [`/src/main/scala/streaming/SparkStreaming.scala`](/src/main/scala/streaming/SparkStreaming.scala)
 e si basa sul rispettivo container _docker_ presente in
 [`/src/main/docker/stream-container`](/src/main/docker/stream-container).
+
 __Istruzioni di lancio__:
 - aggiungere la riga `127.0.0.1   localhost   stream` in `etc/hosts`
 - spostarsi da terminale nella cartella [`/src/main/docker/stream-container`](/src/main/docker/stream-container)
@@ -52,6 +55,7 @@ __Istruzioni di lancio__:
 Analisi svolta in [`/src/main/scala/streaming/SparkStreaming.scala`](/src/main/scala/streaming/SparkStreaming.scala)
 e si basa sul rispettivo container _docker_ presente in
 [`/src/main/scala/streaming/structuredStreaming/SparkStructuredStreaming.scala`](/src/main/scala/streaming/structuredStreaming/SparkStructuredStreaming.scala).
+
 __Istruzioni di lancio__:
 - aggiungere la riga `127.0.0.1   localhost   stream` in `etc/hosts`
 - spostarsi da terminale nella cartella [`/src/main/docker/stream-container`](/src/main/docker/stream-container)
