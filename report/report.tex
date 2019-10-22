@@ -90,7 +90,7 @@ Utilizzarla con Spark è molto semplice:
 	\item decomprimere la cartella e posizionarsi all'interno di essa da terminale;
 	\item a questo punto, lanciando il comando \texttt{./bin/spark-shell} partirà la shell.
 \end{itemize}
-Si può anche memorizzare questo percorso nel path di sistema e accedervi da qualsiasi parte del file system. Aggiungendo a \texttt{$\sim$/.bashrc}: %TODO tilde
+Si può anche memorizzare questo percorso nel path di sistema e accedervi da qualsiasi parte del file system. Aggiungendo a \texttt{$\sim$/.bashrc}:
 \begin{itemize}
 	\item \texttt{export SPARK\_HOME="percorso della cartella decompressa"} 
 	\item \texttt{export PATH=$PATH:$SPARK\_HOME/bin:\$SPARK\_HOME/sbin}
@@ -424,7 +424,7 @@ Le operazioni supportate nell'interrogazione ai dati che provengono dalla \textt
 	\item \textbf{UDF} \cite{internalsSQL} (\textit{user defined functions}): si tratta di normalissime funzioni Scala definite dall'utente, che si possono considerare come ``black box". Il tutto ha un senso unificato all'utilizzo di case class definite dall'utente rappresentative dei record appartenenti agli stream di dati.
 	Le UDF sono registrabili anche globalmente nella sessione.
 	Ma attenzione ad all'utilizzo di UDF, bisogna vedere i piani di esecuzione, valutari e comprendere se effettivamente, essendo scatole nere, ottimizzano l'esecuzione. O se essa può essere resa meno leggibile ma più performante, e comunque eseguibile, con i meccanismi offerti da Spark e dai suoi moduli. Inoltre, UDF ha problemi di seriazzazione, ogni volta deve deserializzare e serializzare le colonne, per cui quando possibile è consigliato preferire le funzioni builtin che in SparkSQL non sono poche \cite{spark}. 
-	\item \textbf{UDAF} \cite{internalsSQL} (user-defined aggregate function) : si tratta di funzioni personalizzate che forniscono aggregazione, %TODO
+	\item \textbf{UDAF} \cite{internalsSQL} (user-defined aggregate function) : si tratta di funzioni personalizzate che forniscono aggregazione, estensione di \texttt{UserDefinedAggregateFunctions}. Una UDAF riduce dimensionalmente i dati, a differenza di una UDF che effettua una trasfomazione uno a uno, e valgono le considerazioni fatte per le UDF.
 \end{itemize}
 Nell'abito delle \textbf{operazioni con stato arbitrarie}, esistono delle funzioni che permettono di usare le UDF su Dataset aggregati, per aggiornare lo stato definito dall'utente (\texttt{mapGroupsWithState} e \texttt{flatMapGroupsWithState}).
 
