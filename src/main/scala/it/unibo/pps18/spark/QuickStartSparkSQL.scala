@@ -1,3 +1,5 @@
+package it.unibo.pps18.spark
+
 object QuickStartSparkSQL {
 
   import org.apache.spark.sql.functions._

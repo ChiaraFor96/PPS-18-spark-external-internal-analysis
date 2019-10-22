@@ -316,7 +316,7 @@ Spark Streaming, come mostrato in Figura \ref{fig:SparkStreaming}, raccoglie dat
 \end{figure}
 \par Internamente Spark Streaming, come mostrato in  Figura \ref{fig:SparkStreamingBatch}, divide lo stream in batch di dati che vengono processati dalla Spark Engine.
 \newline
-La lettura di uno streaming avviene tramite un \textbf{Receiver} ed eredita dall'astrazione \textbf{DStream}, si tratta di dati che provengono da varie fonti (es. Kafka, Flume, and Kinesis) o da operazione ad alto livello su altri DStream.
+La lettura di uno it.unibo.pps18.spark.streaming avviene tramite un \textbf{Receiver} ed eredita dall'astrazione \textbf{DStream}, si tratta di dati che provengono da varie fonti (es. Kafka, Flume, and Kinesis) o da operazione ad alto livello su altri DStream.
 Un DStream può essere considerato come una sequenza di RDDs.
 \begin{figure}[H]
 	\centering 
@@ -346,33 +346,33 @@ Un'esempio grafico di quello che accade con questo genere di trasformazioni è m
 	\caption{Divisione dei DStream in finestre temporali. Immagine tratta da \cite{spark}.}
 	\label{fig:SparkStreamingWindow}
 \end{figure}
-\par Una nota di rilevanza fondamentale nello streaming e non supportata da questo modulo è che: esso non riesce a lavorare con il tempo dell'evento, ma solo con l'evento di Spark.
+\par Una nota di rilevanza fondamentale nello it.unibo.pps18.spark.streaming e non supportata da questo modulo è che: esso non riesce a lavorare con il tempo dell'evento, ma solo con l'evento di Spark.
 \par Per la gestione degli errori con questo modulo è necessario replicare i dati in altri supporti (es. Kafka).
 \par Con Spark Streaming, non ci sono restrizioni per utilizzare qualsiasi tipo di sink, ovvero fonti esterne su dove esportare il risultato di operazioni di aggregazioni sui dati provenienti dagli Stream. Infatti, attraverso il metodo ``\texttt{foreachRDD}" è possibile accedere ai dati del DStream e farci essenzialmente qualsiasi cosa. 
 
-\par In \texttt{src/main/scala/streaming/SparkStreaming.scala} è presente un esempio di utilizzo del modulo, nel quale vengono creati dei Receiver di stream di dati infiniti e vengono effettuate operazioni di vario genere per capire fino a che punto ci si può spingere con questo modulo e cosa offre. I limiti riscontrati in confronto con il nuovo modulo Structured Streming \ref{sec:structuredstreaming}, sono notevoli e verranno discussi nella seguente sezione.
+\par In \texttt{src/main/scala/it.unibo.pps18.spark.streaming/SparkStreaming.scala} è presente un esempio di utilizzo del modulo, nel quale vengono creati dei Receiver di stream di dati infiniti e vengono effettuate operazioni di vario genere per capire fino a che punto ci si può spingere con questo modulo e cosa offre. I limiti riscontrati in confronto con il nuovo modulo Structured Streming \ref{sec:structuredstreaming}, sono notevoli e verranno discussi nella seguente sezione.
 
-\par Inoltre, si è cercato di comprendere le differenze di questo modulo rispetto ad altri framework e librerie per la gestione dello streaming \footnote{\url{https://medium.com/@chandanbaranwal/spark-streaming-vs-flink-vs-storm-vs-kafka-streams-vs-samza-choose-your-stream-processing-91ea3f04675b}}. Nello specifico:
+\par Inoltre, si è cercato di comprendere le differenze di questo modulo rispetto ad altri framework e librerie per la gestione dello it.unibo.pps18.spark.streaming \footnote{\url{https://medium.com/@chandanbaranwal/spark-it.unibo.pps18.spark.streaming-vs-flink-vs-storm-vs-kafka-streams-vs-samza-choose-your-stream-processing-91ea3f04675b}}. Nello specifico:
 \begin{itemize}
-	\item \textbf{Apache Storm}\footnote{\url{https://www.slideshare.net/ptgoetz/apache-storm-vs-spark-streaming}} \footnote{\url{https://www.educba.com/apache-storm-vs-apache-spark/}}: si tratta di un framework che processa nativamente stream di dati, con un modulo che offre anche la possibilità di lavorare in micro-batch (\textit{Trident}). Spark è totalmente differente, è un framework per processare batch di dati e aggiuntivamente con il modulo SparkStreaming lavora su stream di dati in micro-batch. Per cui il confronto tra i due mondi è poco applicabile, infatti a tutto ciò si inserisce il fatto che non esistono benchmark e configurazioni pubbliche di Spark e il paper relativo a SparkStreaming\cite{sparkStreaming} risulta antecedente di due anni rispetto allo sviluppo di Trident. Ci sono nette differenze tra Trident e SparkStreaming soprattutto nella gestione più occurata delle failure da parte di Trident, in termini di performance si dimostra che SparkStreaming sia 40x volte più veloce.
-	Storm, inoltre, risulta più difficile da apprendere, da utilizzare e comprendere rispetto a Spark, inoltre, l'ecosistema che offre Spark spesso viene preso in considerazione per avere una visone completa del contesto dei dati e non solo dello streaming.
-	\item \textbf{Flink}: nativamente per lo streaming (similmente a Storm) ma con supporto anche a dati batch, molto simile a Spark. Infatti, sembra ci sia proprio una lotta per il primato con Spark nella quale Flink sembra superarlo, ma quest' ultimo sta recuperando punti con il modulo di Structured Streaming.
+	\item \textbf{Apache Storm}\footnote{\url{https://www.slideshare.net/ptgoetz/apache-storm-vs-spark-it.unibo.pps18.spark.streaming}} \footnote{\url{https://www.educba.com/apache-storm-vs-apache-spark/}}: si tratta di un framework che processa nativamente stream di dati, con un modulo che offre anche la possibilità di lavorare in micro-batch (\textit{Trident}). Spark è totalmente differente, è un framework per processare batch di dati e aggiuntivamente con il modulo SparkStreaming lavora su stream di dati in micro-batch. Per cui il confronto tra i due mondi è poco applicabile, infatti a tutto ciò si inserisce il fatto che non esistono benchmark e configurazioni pubbliche di Spark e il paper relativo a SparkStreaming\cite{sparkStreaming} risulta antecedente di due anni rispetto allo sviluppo di Trident. Ci sono nette differenze tra Trident e SparkStreaming soprattutto nella gestione più occurata delle failure da parte di Trident, in termini di performance si dimostra che SparkStreaming sia 40x volte più veloce.
+	Storm, inoltre, risulta più difficile da apprendere, da utilizzare e comprendere rispetto a Spark, inoltre, l'ecosistema che offre Spark spesso viene preso in considerazione per avere una visone completa del contesto dei dati e non solo dello it.unibo.pps18.spark.streaming.
+	\item \textbf{Flink}: nativamente per lo it.unibo.pps18.spark.streaming (similmente a Storm) ma con supporto anche a dati batch, molto simile a Spark. Infatti, sembra ci sia proprio una lotta per il primato con Spark nella quale Flink sembra superarlo, ma quest' ultimo sta recuperando punti con il modulo di Structured Streaming.
 	\item \textbf{KafkaStream}: libreria \textit{light-weight} che può essere utilizzata in un'architettura a micro servizi. Facile da capire e da usare, con il vincolo di avere \textit{Kafka}. 
 	\item \textbf{Samza}: simile a \textit{KafkaStream}, sviluppata dagli stessi sviluppatori. Samza è una specie di versione ridimensionata di Kafka Streams. Mentre Kafka Streams è una libreria destinata ai microservizi, Samza è un'elaborazione cluster completa che gira su Yarn.
 \end{itemize}
-Tirando le somme, la scelta della soluzione di streaming da utilizzare dipende dai casi. Nel caso di IoT, sistemi nativamente stream, come Kafka e Storm, sono altamente consigliati. Considerando cambiamenti a lungo termine potrebbe essere opportuno appoggiarsi su framework più completi, come Flink e Spark. Così come avere già altri parti di sistemi su Spark (o Flink) porta naturalmente ad usare i moduli offerti dal framework che già si sta utilizzando.
+Tirando le somme, la scelta della soluzione di it.unibo.pps18.spark.streaming da utilizzare dipende dai casi. Nel caso di IoT, sistemi nativamente stream, come Kafka e Storm, sono altamente consigliati. Considerando cambiamenti a lungo termine potrebbe essere opportuno appoggiarsi su framework più completi, come Flink e Spark. Così come avere già altri parti di sistemi su Spark (o Flink) porta naturalmente ad usare i moduli offerti dal framework che già si sta utilizzando.
 Inoltre, bisogna anche capire la garanzia dal punto di vista di aggiornamenti che vengono offerti, per questo punto Spark sembra sia molto attivo.
 Con gli anni come qualsiasi ambito informatico le cose potrebbero cambiare, si stanno sviluppando tante altre soluzione proprietarie e non, come rispettivamente \textit{Google Dataflow} \footnote{\url{https://cloud.google.com/dataflow/}} e \textit{Apache Apex} \footnote{\url{https://apex.apache.org}}.
 
 \par In ogni caso nel mondo Spark, la tendenza, la novità e il maggior supporto sembra sia nel modulo ``\textit{Spark Structured Streaming}", il quale verrà discusso di seguito.
-Nonostante ciò sembra continui ad esserci dell'interesse per questo modulo, magari per dati senza una struttura ben delienata. Un esempio dei giorni d'oggi è l'uso di questo framework applicato al 5G \footnote{\url{https://www.ericsson.com/en/blog/2019/6/applying-the-spark-streaming-framework-to-5g}}.
+Nonostante ciò sembra continui ad esserci dell'interesse per questo modulo, magari per dati senza una struttura ben delienata. Un esempio dei giorni d'oggi è l'uso di questo framework applicato al 5G \footnote{\url{https://www.ericsson.com/en/blog/2019/6/applying-the-spark-it.unibo.pps18.spark.streaming-framework-to-5g}}.
 
 \subsubsection{Spark Structured Streaming}\label{sec:structuredstreaming}
 Streaming strutturato, costruito sopra a Spark SQL e dunque con supporto a DataFrame e Dataset. 
 Sostanzialmente è possibile riuso totale del codice scritto per interrogazioni statiche su SparkSQL.
 \par Non c'è il concetto di batch di Spark Streaming, assomiglia più a uno stream \textit{real time}.
 In ogni caso sotto si procede micro batch, dalla versione 2.3 di spark è stato aggiunto il concetto di \textit{Continuous Processing} che ha ridotto ulteriormente la latenza.
-Nota interessante è nell'approcciarsi al CP, Spark ha usato una versione adattata del noto algoritmo di Chandy-Lamport (visto in PCD) \footnote{\url{https://databricks.com/blog/2018/03/20/low-latency-continuous-processing-mode-in-structured-streaming-in-apache-spark-2-3-0.html}}.
+Nota interessante è nell'approcciarsi al CP, Spark ha usato una versione adattata del noto algoritmo di Chandy-Lamport (visto in PCD) \footnote{\url{https://databricks.com/blog/2018/03/20/low-latency-continuous-processing-mode-in-structured-it.unibo.pps18.spark.streaming-in-apache-spark-2-3-0.html}}.
 \par I dati, come mostrato in Figura \ref{fig:StructuredStreaming}, vengono aggiunti a una tabella potenzialemente infinita, composta da una sola colonna ``value" (DataSet \textless Row\textgreater ),  la quale tramite le funzionalità di SparkSQL e opportuni interventi del programmatore nel definire classi che rispecchiano la struttura dei dati, verrà trasformata nelle colonne opportune.
 É \textbf{importante} sottolineare che non viene materializzata l'intera tabella, man mano che vengono interrogati i dati vengono scartati. 
 \begin{figure}[H]
@@ -384,7 +384,7 @@ Nota interessante è nell'approcciarsi al CP, Spark ha usato una versione adatta
 Per connettersi alle risorse dati bisogna:
 \begin{itemize}
 	\item Creare una \texttt{SparkSession};
-	\item chiamare il metodo \texttt{readStream} su questa, che è effettivamente il metodo \texttt{read} di SparkSQL su uno streaming;
+	\item chiamare il metodo \texttt{readStream} su questa, che è effettivamente il metodo \texttt{read} di SparkSQL su uno it.unibo.pps18.spark.streaming;
 	\item \texttt{.format()} per specificare il tipo di dato (es. Kafka, Socket, File);
 	\item \texttt{.options} per eventuali opzioni come host e porta.
 \end{itemize}
@@ -398,7 +398,7 @@ Con Spark 2.4 lo Structured Streaming ha superato i limiti restringenti che avev
 	\item \textit{Update}: solo righe aggiornate.
 \end{itemize}
 
-Questo modello è molto differente da altre engine di streaming, molte richiedono all'utente stesso di mantenere aggregazioni sui dati precedenti e sulla loro coerenza.
+Questo modello è molto differente da altre engine di it.unibo.pps18.spark.streaming, molte richiedono all'utente stesso di mantenere aggregazioni sui dati precedenti e sulla loro coerenza.
 In questo modello se ne occupa Spark e il tutto rimane trasparente all'utente.
 Le modalità di triggering possono essere:
 \begin{itemize}
@@ -419,7 +419,7 @@ Le operazioni supportate nell'interrogazione ai dati che provengono dalla \textt
 \end{itemize}
 Nell'abito delle \textbf{operazioni con stato arbitrarie}, le funzioni \texttt{mapGroupsWithState} e \texttt{flatMapGroupsWithState} permettono di usare le UDF su Dataset aggregati, per aggiornare lo stato definito dall'utente.
 
-\par Per l'essenza dello streaming, in questo modulo non sono supportate alcune funzioni di SparkSQL \footnote{\url{https://spark.apache.org/docs/2.4.4/structured-streaming-programming-guide.html\#unsupported-operations}}.
+\par Per l'essenza dello it.unibo.pps18.spark.streaming, in questo modulo non sono supportate alcune funzioni di SparkSQL \footnote{\url{https://spark.apache.org/docs/2.4.4/structured-it.unibo.pps18.spark.streaming-programming-guide.html\#unsupported-operations}}.
 
 \par Questo modulo, a differenza di Spark Streaming, riesce a lavorare con il \textbf{tempo dell'evento}. Per questo motivo è più adatto al mondo reale (es. IoT).
 In caso di ritardi è Spark stesso a preoccuparsi di aggiornare e rimanere con l'event time corretto.
@@ -434,7 +434,7 @@ Oltre al checkpointing per ripristinare la condizione dagli errori, usato anche 
 	\item i sink devono supportare operazioni idempotenti per supportare il ritrattamento in caso di guasti.
 \end{itemize}
 \par Con questo modulo si possono fare \textbf{join} \footnote{\url{https://docs.databricks.com/_static/notebooks/stream-stream-joins-scala.html}} (inner, outer, etc.) incrementali con altri DataFrame o Dataset (su una colonna specifica), siano essi statici o non.
-Ancora non c'è un supporto completo \footnote{\url{https://spark.apache.org/docs/2.4.4/structured-streaming-programming-guide.html\#support-matrix-for-joins-in-streaming-queries}}, infatti questa è una delle sfide di questo modulo: risulta difficile fare join su dati che sono incerti e che possono arrivare in qualsiasi momento. Come nello streaming, c'è un \textit{watermark delay} per mantenere i dati oppure una \textit{event-time range condition} per specificare che un certo dato può arrivare in un certo range di tempo.
+Ancora non c'è un supporto completo \footnote{\url{https://spark.apache.org/docs/2.4.4/structured-it.unibo.pps18.spark.streaming-programming-guide.html\#support-matrix-for-joins-in-it.unibo.pps18.spark.streaming-queries}}, infatti questa è una delle sfide di questo modulo: risulta difficile fare join su dati che sono incerti e che possono arrivare in qualsiasi momento. Come nello it.unibo.pps18.spark.streaming, c'è un \textit{watermark delay} per mantenere i dati oppure una \textit{event-time range condition} per specificare che un certo dato può arrivare in un certo range di tempo.
 
 \par Altro aspetto interessante è che è possibile \textbf{deduplicare i record} usando un identificatore univoco per gli eventi. Si può fare:
 \begin{itemize}
@@ -444,11 +444,11 @@ Ancora non c'è un supporto completo \footnote{\url{https://spark.apache.org/doc
 Se con più stream ci sono conflitti di più watermark, di norma viene scelto globalmente il valore più basso. Dato che le necessità possono essere diverse, da Spark 2.4 si può
 settare la policy nella configurazione (max o min).
 
-\par Se si volesse comprendere e monitorare il \textbf{piano di esecuzione delle query}, esistono delle API specifiche e il concetto di \texttt{StreamingQueryListener} \footnote{\url{https://www.slideshare.net/databricks/realtime-spark-from-interactive-queries-to-streaming}}.
+\par Se si volesse comprendere e monitorare il \textbf{piano di esecuzione delle query}, esistono delle API specifiche e il concetto di \texttt{StreamingQueryListener} \footnote{\url{https://www.slideshare.net/databricks/realtime-spark-from-interactive-queries-to-it.unibo.pps18.spark.streaming}}.
 
-\par Un esempio abbastanza completo di utilizzo di questo modulo è mostrato in \texttt{/src/main/scala/streaming/structuredStreaming/SparkStructuredStreaming.scala}, nell'esempio vengono aggregati dati provenienti da fonti rate (fonte di dati simulata fornita dal modulo per fare Proof of Concepts) e da una fonte esterna (\texttt{src/main/docker/stream-container}), ovvero un hdfs su container docker . I dati vengono manipolati e si arriva fare un'aggregazione sia orizzontale, attraverso il tempo, che verticale, lavorando opportunamente sulle colonne. Per lavorare in modo più agevole, si è creato un oggetto di supporto a questo esempio presente in \texttt{/src/main/scala/streaming/structuredStreaming/StreamingDataOrganizerUtils.scala}.
+\par Un esempio abbastanza completo di utilizzo di questo modulo è mostrato in \texttt{/src/main/scala/it.unibo.pps18.spark.streaming/structuredStreaming/SparkStructuredStreaming.scala}, nell'esempio vengono aggregati dati provenienti da fonti rate (fonte di dati simulata fornita dal modulo per fare Proof of Concepts) e da una fonte esterna (\texttt{src/main/docker/stream-container}), ovvero un hdfs su container docker . I dati vengono manipolati e si arriva fare un'aggregazione sia orizzontale, attraverso il tempo, che verticale, lavorando opportunamente sulle colonne. Per lavorare in modo più agevole, si è creato un oggetto di supporto a questo esempio presente in \texttt{/src/main/scala/it.unibo.pps18.spark.streaming/structuredStreaming/StreamingDataOrganizerUtils.scala}.
 
-\par Dagli esempi e dall'approfondimento su questi moduli di streaming, si può concludere che Spark Structured Streaming risulta un modulo in crescita, con supporto al programmatore e che risolve delle pecche presenti in Spark Streaming, come:
+\par Dagli esempi e dall'approfondimento su questi moduli di it.unibo.pps18.spark.streaming, si può concludere che Spark Structured Streaming risulta un modulo in crescita, con supporto al programmatore e che risolve delle pecche presenti in Spark Streaming, come:
 \begin{itemize}
 	\item il \textit{join} su DStream deve essere fatto solo su dati del tipo [(K, V)], dove K è il tipo della chiave;
 	\item il concetto del tempo dell'evento è del tutto trascurato;
@@ -465,7 +465,7 @@ Inoltre, questo modulo, con il supporto di SparkSQL, può essere utilizzato in a
 \begin{quote}
 The Lambda Architecture provides a general-purpose approach to implementing an arbitrary function on an arbitrary dataset and having the function return its results with low latency. That doesn’t mean you’ll always use the exact same technologies every time you implement a data system. The specific technologies you use might change depending on your requirements. But the Lambda Architecture defines a consistent approach to choosing those technologies and to wiring them together to meet your requirements \cite{lambdaArchitecture}.
 \end{quote}
-Nel web Spark è definito come una soluzione semplice, elegante e sempre più popolare: lo stack Spark consente agli sviluppatori di implementare un sistema conforme a LA, utilizzando un ambiente di sviluppo e test unificato (scegli uno di Scala, Python, Java) supportando sia operazioni batch che streaming, su larga scala \footnote{\url{https://databricks.com/session/applying-the-lambda-architecture-with-spark}}.
+Nel web Spark è definito come una soluzione semplice, elegante e sempre più popolare: lo stack Spark consente agli sviluppatori di implementare un sistema conforme a LA, utilizzando un ambiente di sviluppo e test unificato (scegli uno di Scala, Python, Java) supportando sia operazioni batch che it.unibo.pps18.spark.streaming, su larga scala \footnote{\url{https://databricks.com/session/applying-the-lambda-architecture-with-spark}}.
 
 \subsection{Limiti e note finali su Spark}
 

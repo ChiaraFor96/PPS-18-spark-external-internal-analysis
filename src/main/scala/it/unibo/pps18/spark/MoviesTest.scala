@@ -1,3 +1,5 @@
+package it.unibo.pps18.spark
+
 object MoviesTest {
   val numberOfMovies: Int = 9742
   val movieId: String = "movieId"

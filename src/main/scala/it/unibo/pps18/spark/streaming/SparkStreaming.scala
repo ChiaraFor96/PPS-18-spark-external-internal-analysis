@@ -1,4 +1,4 @@
-package streaming
+package it.unibo.pps18.spark.streaming
 
 object SparkStreaming {
 
@@ -9,7 +9,7 @@ object SparkStreaming {
   import scala.util.Random
 
   def main ( args: Array[String] ): Unit = {
-    val sc = new SparkConf ().setAppName ( "Spark streaming example" ).setMaster ( "local[*]" )
+    val sc = new SparkConf ().setAppName ( "Spark it.unibo.pps18.spark.streaming example" ).setMaster ( "local[*]" )
     val batchInterval = Seconds ( 5 )
     val threshold3 = 100
     val ssc = new StreamingContext ( sc, batchInterval )

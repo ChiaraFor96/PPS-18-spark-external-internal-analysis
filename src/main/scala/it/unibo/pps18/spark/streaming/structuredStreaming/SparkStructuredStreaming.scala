@@ -1,15 +1,15 @@
-package streaming.structuredStreaming
+package it.unibo.pps18.spark.streaming.structuredStreaming
 
 object SparkStructuredStreaming {
   def main ( args: Array[String] ): Unit = {
     import StreamingDataOrganizerUtils._
     import StreamingDataOrganizerUtils.structuredManipulationUtilities.ColumnOperations._
-    import streaming.structuredStreaming.StreamingDataOrganizerUtils.structuredManipulationUtilities.StreamRecord
+    import it.unibo.pps18.spark.streaming.structuredStreaming.StreamingDataOrganizerUtils.structuredManipulationUtilities.StreamRecord
     import org.apache.spark.sql.Dataset
     import org.apache.spark.sql.functions._
     import org.apache.spark.sql.streaming.Trigger
     import org.apache.spark.sql.types.{StructType, DataTypes}
-    import streaming.structuredStreaming.StreamingDataOrganizerUtils.CalendarInterval._
+    import it.unibo.pps18.spark.streaming.structuredStreaming.StreamingDataOrganizerUtils.CalendarInterval._
     import spark.implicits._
 
     val datasets: Seq[Dataset[StreamRecord]] = Seq ( getRateDataset ( 10 ),

@@ -1,3 +1,5 @@
+package it.unibo.pps18.spark
+
 object QuickStartBasic {
 
   import org.apache.spark.rdd.RDD
