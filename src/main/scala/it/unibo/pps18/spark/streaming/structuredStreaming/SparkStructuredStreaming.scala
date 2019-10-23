@@ -51,7 +51,6 @@ object SparkStructuredStreaming {
       .withWatermark ( avgTimestampColumn.name, Seconds ( 5 ).toString )
       .groupBy ( window ( avgTimestampColumn, Minutes ( 1 ).toString, Seconds ( 30 ).toString ) )
       .agg ( mean ( avgValueColumn.name ).as ( "InternalAVG" ), mean ( valueColumn.name ).as ( "ExternalAVG" ) )
-
       .writeStream
       .format ( "console" )
       .start

@@ -17,7 +17,7 @@ object SparkStreaming {
     import org.apache.spark.storage.StorageLevel._
 
     //val nc1 = ssc.socketTextStream("localhost", 9960) //started with nc -l -p 9960 localhost
-    val hdfs1 = ssc.textFileStream("hdfs://stream:9999/")
+    //val hdfs1 = ssc.textFileStream("hdfs://stream:9999/")
     val s1 = ssc.receiverStream ( new InfiniteStreamReceiver ( "a", Stream.from ( 100 ), 500, storageLevel = MEMORY_ONLY ) )
     val s2 = ssc.receiverStream ( new InfiniteStreamReceiver ( "b", Stream.from ( 100 ), 200, storageLevel = MEMORY_ONLY ) )
     val s3 = ssc.receiverStream ( new InfiniteStreamReceiver ( "c", Stream.from ( 300 ), 300, storageLevel = MEMORY_ONLY ) )
@@ -26,7 +26,7 @@ object SparkStreaming {
     s1.window(Seconds(20)).join(s2.window(Seconds(30))).map(v => s"join ${v._1} - ${v._2}").print
     s3.window(Seconds(20), slideDuration = Seconds(10))
       .union(s2.window(Seconds(30), slideDuration = Seconds(10))).filter(_._1 % threshold3 > 1).map(_._2).reduce(_ + _).print
-    hdfs1.map ( x => s"hdfs: $x" ).print //don' monitor directory :(
+    //hdfs1.map ( x => s"hdfs: $x" ).print //don' monitor directory :(
 
     //start context
     ssc.start
@@ -40,7 +40,6 @@ object SparkStreaming {
         override def run ( ): Unit = {
           stream.takeWhile { _ => Thread.sleep ( delay ); !isStopped }.foreach ( x => store( (x, new Random().nextInt)) )
         }
-
         setDaemon ( true )
       }.start ()
     }
