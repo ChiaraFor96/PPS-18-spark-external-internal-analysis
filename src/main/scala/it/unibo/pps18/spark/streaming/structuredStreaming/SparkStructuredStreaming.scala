@@ -4,12 +4,12 @@ object SparkStructuredStreaming {
   def main ( args: Array[String] ): Unit = {
     import StreamingDataOrganizerUtils._
     import StreamingDataOrganizerUtils.structuredManipulationUtilities.ColumnOperations._
+    import it.unibo.pps18.spark.streaming.structuredStreaming.StreamingDataOrganizerUtils.CalendarInterval._
     import it.unibo.pps18.spark.streaming.structuredStreaming.StreamingDataOrganizerUtils.structuredManipulationUtilities.StreamRecord
     import org.apache.spark.sql.Dataset
     import org.apache.spark.sql.functions._
     import org.apache.spark.sql.streaming.Trigger
-    import org.apache.spark.sql.types.{StructType, DataTypes}
-    import it.unibo.pps18.spark.streaming.structuredStreaming.StreamingDataOrganizerUtils.CalendarInterval._
+    import org.apache.spark.sql.types.{DataTypes, StructType}
     import spark.implicits._
 
     val datasets: Seq[Dataset[StreamRecord]] = Seq ( getRateDataset ( 10 ),
@@ -17,22 +17,22 @@ object SparkStructuredStreaming {
       getRateDataset ( 30 ) )
 
     val externalSource = spark.readStream
-      .schema(new StructType().add("id",  DataTypes.StringType)
-        .add("timestamp", DataTypes.StringType)
-        .add("value",  DataTypes.StringType))
+      .schema ( new StructType ().add ( "id", DataTypes.StringType )
+        .add ( "timestamp", DataTypes.StringType )
+        .add ( "value", DataTypes.StringType ) )
       .option ( "header", "true" )
-      .format("csv")
-      .load("hdfs://stream:9999/*.csv")
-      .withColumn(valueColumn.name, valueColumn.cast("double"))
-      .withColumn(idColumn.name, idColumn.cast("int"))
-      .withColumn(timestampColumn.name, timestampColumn.cast("timestamp"))
-      .as[StreamRecord]
+      .format ( "csv" )
+      .load ( "hdfs://stream:9999/*.csv" )
+      .withColumn ( valueColumn.name, valueColumn.cast ( "double" ) )
+      .withColumn ( idColumn.name, idColumn.cast ( "int" ) )
+      .withColumn ( timestampColumn.name, timestampColumn.cast ( "timestamp" ) )
+      .as [StreamRecord]
 
-    externalSource.select("*").writeStream.format ( "console" ).start
+    externalSource.select ( "*" ).writeStream.format ( "console" ).start
     //udf function
     datasets.head.select ( udf { s: Long => s.hashCode }.apply ( idColumn ).as ( "hash code" ) )
       .writeStream
-      .trigger ( Trigger.ProcessingTime (  Seconds(2).toString ) )
+      .trigger ( Trigger.ProcessingTime ( Seconds ( 2 ).toString ) )
       //.trigger ( Trigger.Continuous ( Seconds(5).toString ) ) //use experimental CP (in Spark 2.3+).. don't work :)
       .format ( "console" )
       .start
@@ -45,13 +45,12 @@ object SparkStructuredStreaming {
     computedDatasets = computedDatasets.drop ( computedDatasets.columns.filter ( _.equals ( valueColumn.name ) ): _* )
       .drop ( computedDatasets.columns.filter ( _.equals ( timestampColumn.name ) ): _* )
 
+    // computedDatasets.join(externalSource, idColumn.name).select("*").writeStream.format("console").start
 
-   // computedDatasets.join(externalSource, idColumn.name).select("*").writeStream.format("console").start
-
-    computedDatasets.join(externalSource, idColumn.name)
-      .withWatermark ( avgTimestampColumn.name, Seconds(5).toString )
-      .groupBy ( window ( avgTimestampColumn, Minutes(1).toString, Seconds(30).toString ) )
-      .agg ( mean(avgValueColumn.name).as("InternalAVG"), mean( valueColumn.name ).as("ExternalAVG") )
+    computedDatasets.join ( externalSource, idColumn.name )
+      .withWatermark ( avgTimestampColumn.name, Seconds ( 5 ).toString )
+      .groupBy ( window ( avgTimestampColumn, Minutes ( 1 ).toString, Seconds ( 30 ).toString ) )
+      .agg ( mean ( avgValueColumn.name ).as ( "InternalAVG" ), mean ( valueColumn.name ).as ( "ExternalAVG" ) )
 
       .writeStream
       .format ( "console" )
@@ -59,27 +58,4 @@ object SparkStructuredStreaming {
 
     spark.streams.awaitAnyTermination
   }
-}
-
-import org.apache.spark.sql.Row
-import org.apache.spark.sql.expressions.{MutableAggregationBuffer, UserDefinedAggregateFunction}
-import org.apache.spark.sql.types.{DataType, StructType}
-
-//TODO
-class myUDAF() extends UserDefinedAggregateFunction {
-  override def inputSchema: StructType = ???
-
-  override def bufferSchema: StructType = ???
-
-  override def dataType: DataType = ???
-
-  override def deterministic: Boolean = ???
-
-  override def initialize ( buffer: MutableAggregationBuffer ): Unit = ???
-
-  override def update ( buffer: MutableAggregationBuffer, input: Row ): Unit = ???
-
-  override def merge ( buffer1: MutableAggregationBuffer, buffer2: Row ): Unit = ???
-
-  override def evaluate ( buffer: Row ): Any = ???
 }
